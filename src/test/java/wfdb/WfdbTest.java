@@ -32,8 +32,10 @@ import java.io.InputStreamReader;
 
 import org.junit.Test;
 
+
 public class WfdbTest {
 	
+	@Test
 	public void readAndWriteAnnotation() {
 		WFDB_AnninfoArray an = new WFDB_AnninfoArray(2);
 		String record = "100", iann = "100", oann = "EGG";
@@ -61,8 +63,10 @@ public class WfdbTest {
 
 			wfdb.wfdbquit();
 		}
-
-		public void test10(String[] argv) {
+		
+	    @Test
+		public void test10() {
+	    	String[] argv = {};
 			int filter, time=0, slopecrit, sign=1, maxslope=0, nsig, nslope=0,
 			qtime=0, maxtime=0, t0, t1, t2, t3, t4, t5, t6, t7, t8, t9,
 			ms160, ms200, s2, scmax, scmin = 0;
@@ -146,8 +150,9 @@ public class WfdbTest {
 			wfdb.wfdbquit();		
 		}
 
-		public void test2(String[] argv) {
-
+	    @Test
+		public void test2() {
+	    	String[] argv = {};
 			WFDB_AnninfoArray an = new WFDB_AnninfoArray(2);
 			WFDB_Annotation annot = new WFDB_Annotation();
 
@@ -172,7 +177,9 @@ public class WfdbTest {
 			wfdb.wfdbquit();
 		}
 
-		public void test3(String[] argv) {
+	    @Test
+		public void test3() {
+	    	String[] argv = {};
 			WFDB_Anninfo a = new WFDB_Anninfo();
 			WFDB_Annotation annot = new WFDB_Annotation();
 
