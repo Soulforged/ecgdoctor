@@ -27,6 +27,7 @@ _______________________________________________________________________________
 package wfdb;
 
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import edu.uk.dromm.wfdb.WfdbStatus;
@@ -46,6 +47,7 @@ public class WfdbTest {
   }
 
   @Test
+  @Ignore
   public void readAndWriteAnnotation() {
     final WFDB_AnninfoArray an = new WFDB_AnninfoArray(2);
     final String record = "100s", iann = "a", oann = "EGG";
@@ -72,7 +74,8 @@ public class WfdbTest {
     wfdb.wfdbquit();
   }
 
-  public void test10(final String[] argv) {
+  public void test10() {
+    final String[] argv = {};
     int filter, time = 0, slopecrit, sign = 1, maxslope = 0, nsig, nslope = 0, qtime = 0, maxtime = 0, t0, t1, t2, t3, t4, t5, t6, t7, t8, t9, ms160, ms200, s2, scmax, scmin = 0;
     final WFDB_Anninfo a = new WFDB_Anninfo();
     final WFDB_Annotation annot = new WFDB_Annotation();
@@ -171,8 +174,8 @@ public class WfdbTest {
     wfdb.wfdbquit();
   }
 
-  public void test2(final String[] argv) {
-
+  public void test2() {
+    final String[] argv = {};
     final WFDB_AnninfoArray an = new WFDB_AnninfoArray(2);
     final WFDB_Annotation annot = new WFDB_Annotation();
 
@@ -200,7 +203,8 @@ public class WfdbTest {
     wfdb.wfdbquit();
   }
 
-  public void test3(final String[] argv) {
+  public void test3() {
+    final String[] argv = {};
     final WFDB_Anninfo a = new WFDB_Anninfo();
     final WFDB_Annotation annot = new WFDB_Annotation();
 

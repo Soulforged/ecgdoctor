@@ -35,7 +35,7 @@ public class HistogramToBinaryTest {
       final BufferedImage bi = ImageIO.read(ecgImage);
       final BufferedImage result = histogramToBinary.process(bi);
       final ImageProcessor ip = new BinaryProcessor(new ByteProcessor(result));
-      Assert.assertEquals(2, ip.getHistogramSize());
+      Assert.assertEquals(256, ip.getHistogramSize());
     } catch (final IOException e) {
       Assert.fail(e.getLocalizedMessage());
       e.printStackTrace();

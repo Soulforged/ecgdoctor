@@ -38,7 +38,7 @@ FUZZIFY stt
 END_FUZZIFY
 
 FUZZIFY u
-  TERM normal := (0, 60) (0, 100) ; 
+  TERM normal := (0, 1) (4, 0) ; 
   TERM bad := (1, 0) (4,1) (6,1) (9,0);
   TERM dangerous := (6, 0) (9, 1);
   TERM abnormal := (6, 0) (9, 1);
