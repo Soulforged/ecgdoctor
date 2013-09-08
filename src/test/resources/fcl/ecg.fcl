@@ -1,0 +1,75 @@
+FUNCTION_BLOCK diagnosis
+
+VAR_INPUT
+  lead : REAL; //Current lead (1 - 12), one of the 3 orthogonal orientations
+  qrs : REAL; //QRS interval time, ventricular depolarization
+  p : REAL; //P wave time, atrial activation, depolarization, contraction
+  stt : REAL; //ST-T time, ventricular repolarization
+  u : REAL; //U wave time, after ventricular depolarizations
+  rr : REAL; //RR interval, indicator of cardiac cycle time
+  pr : REAL; //Interval between occurances of P and R
+  qt : REAL; //QT interval, duration of ventricular depolarization and repolarization
+  pp : REAL; //PP interval, duration of atrial full cycle
+END_VAR
+
+VAR_OUTPUT
+  diagnosis : REAL;
+END_VAR
+
+FUZZIFY qrs
+  TERM good := (0, 1) (4, 0) ; 
+  TERM bad := (1, 0) (4,1) (6,1) (9,0);
+  TERM dangerous := (6, 0) (9, 1);
+  TERM abnormal := (6, 0) (9, 1);
+END_FUZZIFY
+
+FUZZIFY p
+  TERM good := (0, 1) (4, 0) ; 
+  TERM bad := (1, 0) (4,1) (6,1) (9,0);
+  TERM dangerous := (6, 0) (9, 1);
+  TERM abnormal := (6, 0) (9, 1);
+END_FUZZIFY
+
+FUZZIFY stt
+  TERM good := (0, 1) (4, 0) ; 
+  TERM bad := (1, 0) (4,1) (6,1) (9,0);
+  TERM dangerous := (6, 0) (9, 1);
+  TERM abnormal := (6, 0) (9, 1);
+END_FUZZIFY
+
+FUZZIFY u
+  TERM normal := (0, 60) (0, 100) ; 
+  TERM bad := (1, 0) (4,1) (6,1) (9,0);
+  TERM dangerous := (6, 0) (9, 1);
+  TERM abnormal := (6, 0) (9, 1);
+END_FUZZIFY
+
+FUZZIFY rr
+  TERM good := (0, 1) (4, 0) ; 
+  TERM bad := (1, 0) (4,1) (6,1) (9,0);
+  TERM dangerous := (6, 0) (9, 1);
+  TERM abnormal := (6, 0) (9, 1);
+END_FUZZIFY
+
+FUZZIFY pr
+  TERM good := (0, 1) (4, 0) ; 
+  TERM bad := (1, 0) (4,1) (6,1) (9,0);
+  TERM dangerous := (6, 0) (9, 1);
+  TERM abnormal := (6, 0) (9, 1);
+END_FUZZIFY
+
+FUZZIFY qt
+  TERM good := (0, 1) (4, 0) ; 
+  TERM bad := (1, 0) (4,1) (6,1) (9,0);
+  TERM dangerous := (6, 0) (9, 1);
+  TERM abnormal := (6, 0) (9, 1);
+END_FUZZIFY
+
+FUZZIFY pp
+  TERM good := (0, 1) (4, 0) ; 
+  TERM bad := (1, 0) (4,1) (6,1) (9,0);
+  TERM dangerous := (6, 0) (9, 1);
+  TERM abnormal := (6, 0) (9, 1);
+END_FUZZIFY
+
+END_FUNCTION_BLOCK

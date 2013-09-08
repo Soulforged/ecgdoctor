@@ -29,23 +29,30 @@
   </build>
 
   <dependencies>
-    <dependency>
-	<groupId>gov.nih.imagej</groupId>
-	<artifactId>imagej</artifactId>
-	<version>1.46</version>
-	</dependency>
-	 <dependency>
-      <groupId>wfdb</groupId>
-      <artifactId>wfdb-java</artifactId>
-      <version>10.5.0</version>
-      <scope>system</scope>
-      <systemPath>${basedir}/src/main/resources/lib/wfdb.jar</systemPath>
-    </dependency>
-    <dependency>
-      <groupId>junit</groupId>
-      <artifactId>junit</artifactId>
-      <version>4.11</version>
-      <scope>test</scope>
-    </dependency>
-  </dependencies>
+   <dependency>
+    <groupId>gov.nih.imagej</groupId>
+    <artifactId>imagej</artifactId>
+    <version>1.46</version>
+   </dependency>
+   <dependency>
+    <groupId>jFuzzyLogic</groupId>
+    <artifactId>jFuzzyLogic</artifactId>
+    <version>3.0</version>
+    <scope>system</scope>
+    <systemPath>${basedir}/src/main/resources/lib/jFuzzyLogic.jar</systemPath>
+   </dependency>
+   <dependency>
+    <groupId>wfdb</groupId>
+    <artifactId>wfdb-java</artifactId>
+    <version>10.5.0</version>
+    <scope>system</scope>
+    <systemPath>${basedir}/src/main/resources/lib/wfdb.jar</systemPath>
+   </dependency>
+   <dependency>
+     <groupId>junit</groupId>
+     <artifactId>junit</artifactId>
+     <version>4.11</version>
+     <scope>test</scope>
+   </dependency>
+</dependencies>
 </project>
