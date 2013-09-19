@@ -27,7 +27,6 @@ _______________________________________________________________________________
 package wfdb;
 
 import java.io.BufferedReader;
-import java.io.IOException;
 import java.io.InputStreamReader;
 
 import org.junit.Test;
@@ -60,7 +59,7 @@ public class WfdbTest {
 				if (wfdb.putann(0, annot) < 0)
 					break;
 			}
-
+			System.out.println(annot.getTime());
 			wfdb.wfdbquit();
 		}
 		

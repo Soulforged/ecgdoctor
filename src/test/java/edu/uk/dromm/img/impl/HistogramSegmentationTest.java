@@ -3,8 +3,7 @@
  */
 package edu.uk.dromm.img.impl;
 
-import ij.process.BinaryProcessor;
-import ij.process.ByteProcessor;
+import ij.process.ColorProcessor;
 import ij.process.ImageProcessor;
 
 import java.awt.image.BufferedImage;
@@ -22,9 +21,9 @@ import edu.uk.dromm.img.ImageProcess;
  * @author dicardo
  * 
  */
-public class HistogramToBinaryTest {
+public class HistogramSegmentationTest {
 
-  private final ImageProcess histogramToBinary = new HistogramToBinary(50.0);
+  private final ImageProcess histogramSegmentation = new HistogramSegmentation();
 
   @Test
   public void processLeadsToATwoBitImage() {
@@ -33,9 +32,14 @@ public class HistogramToBinaryTest {
           "/image/ecg-output-lrg.jpg");
       Assert.assertNotNull(ecgImage);
       final BufferedImage bi = ImageIO.read(ecgImage);
-      final BufferedImage result = histogramToBinary.process(bi);
-      final ImageProcessor ip = new BinaryProcessor(new ByteProcessor(result));
-      Assert.assertEquals(2, ip.getHistogramSize());
+      final BufferedImage result = histogramSegmentation.process(bi);
+      final ImageProcessor ip = new ColorProcessor(result);
+      final int[] histogram = ip.getHistogram();
+      Assert.assertTrue(histogram[0] > 0);
+      Assert.assertTrue(histogram[255] > 0);
+      for (int i = 1; i < histogram.length - 1; i++) {
+        Assert.assertTrue(histogram[i] == 0);
+      }
     } catch (final IOException e) {
       Assert.fail(e.getLocalizedMessage());
       e.printStackTrace();
