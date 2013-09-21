@@ -17,10 +17,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
-import java.util.Map.Entry;
 
 import javax.imageio.ImageIO;
 
@@ -35,8 +32,7 @@ public class ImageJTest implements PlugInFilter {
 
   private Map<Long, Long> histogramData;
 
-  private final int       black     = -16777216, white = -1;
-  private final float     tolerance = 50.0f;
+  private final int black = -16777216, white = -1;
 
   @Test
   public void colorsFromBlackToWhiteToHexaAreSequential() {
@@ -47,62 +43,18 @@ public class ImageJTest implements PlugInFilter {
   }
 
   @Test
-  public void findEdges() {
-    try {
-      final URL ecgImage = this.getClass().getResource(
-          "/image/ecg-output-lrg.jpg");
-      Assert.assertNotNull(ecgImage);
-      BufferedImage bi;
-      bi = ImageIO.read(ecgImage);
-      final ImageProcessor ip = new ColorProcessor(bi);
-      new FindEdgesFilter().run(ip);
-    } catch (final IOException e) {
-      e.printStackTrace();
-    }
-  }
-
-  @Test
-  public void findEdgesBinaryToBinary() {
-    try {
-      final URL ecgImage = this.getClass().getResource(
-          "/image/ecg-output-lrg.jpg");
-      Assert.assertNotNull(ecgImage);
-      final BufferedImage bi = ImageIO.read(ecgImage);
-      final ImageProcessor ip = new ColorProcessor(bi);
-      final BinaryProcessor bp = new BinaryProcessor(
-          (ByteProcessor) ip.convertToByte(false));
-      new FindEdgesBinaryFilter().run(bp);
-    } catch (final IOException e) {
-      e.printStackTrace();
-    }
-  }
-
-  @Test
   public void process() {
     try {
-      final URL ecgImage = this.getClass().getResource(
-          "/image/ecg-output-lrg.jpg");
+      URL ecgImage = this.getClass().getResource("/image/ecg-byn.jpg");
       Assert.assertNotNull(ecgImage);
-      final BufferedImage bi = ImageIO.read(ecgImage);
-      final ImageProcessor ip = new ColorProcessor(bi);
-      run(ip);
-      histogramData = new HashMap<Long, Long>(32000);
-      final Iterator<Entry<Long, Long>> it = histogramData.entrySet()
-          .iterator();
-      Long value = 0L;
-      while (it.hasNext()) {
-        final Entry<Long, Long> entry = it.next();
-        value += entry.getValue();
-        final Long key = entry.getKey();
-        final String hex = Long.toHexString(key);
-        final int intValue = key.intValue();
-        System.out.println(String.format("%s,%s,%s,%s:%s:%s:%s", ip
-            .getColorModel().getAlpha(intValue),
-            ip.getColorModel().getRed(intValue),
-            ip.getColorModel().getGreen(intValue),
-            ip.getColorModel().getBlue(intValue), key, hex, value));
-      }
-      System.out.println("Total: " + value);
+      BufferedImage bi = ImageIO.read(ecgImage);
+      ImageProcessor ip = new ColorProcessor(bi);
+      doRun(ip, "target/ecg-byn-out.png");
+      ecgImage = this.getClass().getResource("/image/ecg-pink.jpg");
+      Assert.assertNotNull(ecgImage);
+      bi = ImageIO.read(ecgImage);
+      ip = new ColorProcessor(bi);
+      doRun(ip, "target/ecg-pink-out.png");
     } catch (final IOException e) {
       Assert.fail(e.getLocalizedMessage());
       e.printStackTrace();
@@ -116,13 +68,17 @@ public class ImageJTest implements PlugInFilter {
    */
   @Override
   public void run(final ImageProcessor ip) {
-    final File outFile = new File("target/hist-out.png");
+    doRun(ip, "Dani.png");
+  }
+
+  private void doRun(final ImageProcessor ip, final String stringOut) {
+    final File outFile = new File(stringOut);
     try {
-      final BinaryProcessor proc = new BinaryProcessor((ByteProcessor)ip.convertToByte(false));
+      final BinaryProcessor proc = new BinaryProcessor(
+          (ByteProcessor) ip.convertToByte(false));
       System.out.println(String.format("Histogram: %s, %s, %s",
           proc.getHistogramSize(), proc.getHistogramMax(),
           proc.getHistogramMin()));
-      //      proc.setAutoThreshold(AutoThresholder.Method.Moments, false);
       final ImageStatistics statistics = proc.getStatistics();
       final double median = statistics.median;
       final double mean = statistics.mean;
@@ -135,17 +91,22 @@ public class ImageJTest implements PlugInFilter {
       System.out.println("Angle " + angle);
       System.out.println("Median " + median);
       System.out.println("Mean " + median);
+      System.out.println("before : " + Arrays.toString(proc.getHistogram()));
       proc.threshold(45);
-      //      proc.findEdges();
-      //      proc.dilate();
       proc.sharpen();
-      System.out.println(Arrays.toString(proc.getCalibrationTable()));
-      System.out.println(Arrays.toString(proc.getHistogram()));
+      System.out.println("after : " + Arrays.toString(proc.getHistogram()));
       ImageIO.write(ip.getBufferedImage(), "png", new File("target/pure.png"));
       ImageIO.write(proc.getBufferedImage(), "png", outFile);
     } catch (final IOException e) {
       e.printStackTrace();
     }
+  }
+
+  private double calculate(final int[] h) {
+    for (int i = 0; i < h.length; i++) {
+
+    }
+    return 0.0;
   }
 
   /*
@@ -156,48 +117,5 @@ public class ImageJTest implements PlugInFilter {
   @Override
   public int setup(final String arg0, final ImagePlus arg1) {
     return NO_CHANGES;
-  }
-
-  class FindEdgesFilter implements PlugInFilter {
-    @Override
-    public void run(final ImageProcessor ip) {
-      final File outFile = new File("target/edges.png");
-      try {
-        final BufferedImage sIM = new BufferedImage(ip.getWidth(),
-            ip.getHeight(), BufferedImage.TYPE_4BYTE_ABGR);
-        final ColorProcessor proc = new ColorProcessor(sIM);
-        histogramData = new HashMap<Long, Long>(32000);
-        proc.findEdges();
-        ImageIO.write(sIM, "png", outFile);
-      } catch (final IOException e) {
-        e.printStackTrace();
-      }
-    }
-
-    @Override
-    public int setup(final String arg0, final ImagePlus arg1) {
-      return NO_CHANGES;
-    }
-  }
-
-  class FindEdgesBinaryFilter implements PlugInFilter {
-    @Override
-    public void run(final ImageProcessor ip) {
-      final File outFile = new File("target/edges10.png");
-      try {
-        final BufferedImage sIM = new BufferedImage(ip.getWidth(),
-            ip.getHeight(), BufferedImage.TYPE_BYTE_GRAY);
-        final BinaryProcessor proc = new BinaryProcessor(new ByteProcessor(sIM));
-        proc.findEdges();
-        ImageIO.write(sIM, "png", outFile);
-      } catch (final IOException e) {
-        e.printStackTrace();
-      }
-    }
-
-    @Override
-    public int setup(final String arg0, final ImagePlus arg1) {
-      return NO_CHANGES;
-    }
   }
 }

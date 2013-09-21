@@ -28,8 +28,7 @@ public class HistogramSegmentationTest {
   @Test
   public void processLeadsToATwoBitImage() {
     try {
-      final URL ecgImage = this.getClass().getResource(
-          "/image/ecg-output-lrg.jpg");
+      final URL ecgImage = this.getClass().getResource("/image/ecg-byn.jpg");
       Assert.assertNotNull(ecgImage);
       final BufferedImage bi = ImageIO.read(ecgImage);
       final BufferedImage result = histogramSegmentation.process(bi);
