@@ -17,7 +17,6 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.util.Arrays;
-import java.util.Map;
 
 import javax.imageio.ImageIO;
 
@@ -29,8 +28,6 @@ import org.junit.Test;
  * 
  */
 public class ImageJTest implements PlugInFilter {
-
-  private Map<Long, Long> histogramData;
 
   private final int black = -16777216, white = -1;
 

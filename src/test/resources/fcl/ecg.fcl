@@ -41,7 +41,7 @@ END_FUZZIFY
 
 DEFUZZIFY result
   TERM nsr := 1;
-  TERM cardiopathy := 0; 
+  TERM cardiopathy := 0;
   METHOD : LM;
   DEFAULT := 0;
 END_DEFUZZIFY

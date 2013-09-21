@@ -33,14 +33,6 @@ import org.junit.Test;
 import edu.uk.dromm.wfdb.WfdbStatus;
 
 public class WfdbTest {
-	
-	@Test
-	public void readAndWriteAnnotation() {
-		WFDB_AnninfoArray an = new WFDB_AnninfoArray(2);
-		String record = "100", iann = "100", oann = "EGG";
-		WFDB_Annotation annot = new WFDB_Annotation();
-		BufferedReader stdin = new BufferedReader(new InputStreamReader(
-			System.in));
 
   private final WfdbStatus status = new WfdbStatus();
 
