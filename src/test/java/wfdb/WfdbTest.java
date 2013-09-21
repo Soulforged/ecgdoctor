@@ -39,10 +39,10 @@ public class WfdbTest {
   @BeforeClass
   public static void configure() {
     String javaLibraryPath = System.getProperty("java.library.path");
-    if(javaLibraryPath == null)
+    if (javaLibraryPath == null) {
       javaLibraryPath = "";
-    System.setProperty("java.library.path",
-        javaLibraryPath
+    }
+    System.setProperty("java.library.path", javaLibraryPath
         + ":/home/dicardo/Development/ecgdoctor/src/main/resources/lib");
   }
 
@@ -62,14 +62,17 @@ public class WfdbTest {
     a.setStat(wfdb.WFDB_WRITE);
     an.setitem(1, a);
     int r = 0;
-    if ((r = wfdb.annopen(record, an.cast(), 2)) < 0)
+    if ((r = wfdb.annopen(record, an.cast(), 2)) < 0) {
       throw new RuntimeException(status.message("annopen", r));
-    while (wfdb.getann(0, annot) == 0)
+    }
+    while (wfdb.getann(0, annot) == 0) {
       if (wfdb.wfdb_isqrs(annot.getAnntyp()) != 0) {
         annot.setAnntyp(wfdb.NORMAL);
-        if (wfdb.putann(0, annot) < 0)
+        if (wfdb.putann(0, annot) < 0) {
           break;
+        }
       }
+    }
 
     wfdb.wfdbquit();
   }
@@ -92,18 +95,23 @@ public class WfdbTest {
     a.setName("qrs");
     a.setStat(wfdb.WFDB_WRITE);
 
-    if ((nsig = wfdb.isigopen(argv[0], null, 0)) < 1)
+    if ((nsig = wfdb.isigopen(argv[0], null, 0)) < 1) {
       System.exit(2);
+    }
     final WFDB_SiginfoArray s = new WFDB_SiginfoArray(nsig);
     final WFDB_SampleArray v = new WFDB_SampleArray(nsig);
-    if (wfdb.wfdbinit(argv[0], a, 1, s.cast(), nsig) != nsig)
+    if (wfdb.wfdbinit(argv[0], a, 1, s.cast(), nsig) != nsig) {
       System.exit(2);
-    if (wfdb.sampfreq(null) < 240. || wfdb.sampfreq(null) > 260.)
+    }
+    if (wfdb.sampfreq(null) < 240. || wfdb.sampfreq(null) > 260.) {
       wfdb.setifreq(250.);
-    if (argv.length > 1)
+    }
+    if (argv.length > 1) {
       scmin = wfdb.muvadu(0, Integer.parseInt(argv[1]));
-    if (scmin < 1)
+    }
+    if (scmin < 1) {
       scmin = wfdb.muvadu(0, 1000);
+    }
     slopecrit = scmax = 10 * scmin;
     ms160 = wfdb.strtim("0.16");
     ms200 = wfdb.strtim("0.2");
@@ -118,16 +126,19 @@ public class WfdbTest {
     do {
       filter = (t0 = v.getitem(0)) + 4 * t1 + 6 * t2 + 4 * t3 + t4 - t5 - 4
           * t6 - 6 * t7 - 4 * t8 - t9;
-      if (time % s2 == 0)
+      if (time % s2 == 0) {
         if (nslope == 0) {
           slopecrit -= slopecrit >> 4;
-    if (slopecrit < scmin)
-      slopecrit = scmin;
+          if (slopecrit < scmin) {
+            slopecrit = scmin;
+          }
         } else if (nslope >= 5) {
           slopecrit += slopecrit >> 4;
-        if (slopecrit > scmax)
-          slopecrit = scmax;
+          if (slopecrit > scmax) {
+            slopecrit = scmax;
+          }
         }
+      }
       if (nslope == 0 && Math.abs(filter) > slopecrit) {
         nslope = 1;
         maxtime = ms160;
@@ -138,19 +149,21 @@ public class WfdbTest {
         if (filter * sign < -slopecrit) {
           sign = -sign;
           maxtime = ++nslope > 4 ? ms200 : ms160;
-        } else if (filter * sign > slopecrit && Math.abs(filter) > maxslope)
+        } else if (filter * sign > slopecrit && Math.abs(filter) > maxslope) {
           maxslope = Math.abs(filter);
+        }
         if (maxtime-- < 0) {
           if (2 <= nslope && nslope <= 4) {
             slopecrit += (maxslope >> 2) - slopecrit >> 3;
-        if (slopecrit < scmin)
-          slopecrit = scmin;
-        else if (slopecrit > scmax)
-          slopecrit = scmax;
-        annot.setTime(wfdb.strtim("i") - (time - qtime) - 4);
-        annot.setAnntyp(wfdb.NORMAL);
-        wfdb.putann(0, annot);
-        time = 0;
+            if (slopecrit < scmin) {
+              slopecrit = scmin;
+            } else if (slopecrit > scmax) {
+              slopecrit = scmax;
+            }
+            annot.setTime(wfdb.strtim("i") - (time - qtime) - 4);
+            annot.setAnntyp(wfdb.NORMAL);
+            wfdb.putann(0, annot);
+            time = 0;
           } else if (nslope >= 5) {
             annot.setTime(wfdb.strtim("i") - (time - qtime) - 4);
             annot.setAnntyp(wfdb.ARFCT);
@@ -196,10 +209,12 @@ public class WfdbTest {
     a.setName("aha");
     a.setStat(wfdb.WFDB_AHA_WRITE);
     an.setitem(1, a);
-    if (wfdb.annopen(argv[0], an.cast(), 2) < 0)
+    if (wfdb.annopen(argv[0], an.cast(), 2) < 0) {
       System.exit(2);
-    while (wfdb.getann(0, annot) == 0 && wfdb.putann(0, annot) == 0)
+    }
+    while (wfdb.getann(0, annot) == 0 && wfdb.putann(0, annot) == 0) {
       ;
+    }
     wfdb.wfdbquit();
   }
 
@@ -220,13 +235,15 @@ public class WfdbTest {
     a.setName(argv[0]);
     a.setStat(wfdb.WFDB_READ);
     wfdb.sampfreq(argv[1]);
-    if (wfdb.annopen(argv[1], a, 1) < 0)
+    if (wfdb.annopen(argv[1], a, 1) < 0) {
       System.exit(2);
-    while (wfdb.getann(0, annot) == 0)
+    }
+    while (wfdb.getann(0, annot) == 0) {
       System.out.println(wfdb.timstr(-annot.getTime()) + " (" + annot.getTime()
           + ") " + wfdb.annstr(annot.getAnntyp()) + " " + annot.getSubtyp()
           + " " + annot.getChan() + " " + annot.getNum() + " "
           + (annot.getAux() == null ? "" : annot.getAux().substring(1)));
+    }
     wfdb.wfdbquit();
   }
 }
