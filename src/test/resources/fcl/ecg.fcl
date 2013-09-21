@@ -1,75 +1,63 @@
 FUNCTION_BLOCK diagnosis
 
+//All time measures are done in milliseconds, all potential measures are done in millivolts
 VAR_INPUT
-  lead : REAL; //Current lead (1 - 12), one of the 3 orthogonal orientations
-  qrs : REAL; //QRS interval time, ventricular depolarization
-  p : REAL; //P wave time, atrial activation, depolarization, contraction
-  stt : REAL; //ST-T time, ventricular repolarization
-  u : REAL; //U wave time, after ventricular depolarizations
-  rr : REAL; //RR interval, indicator of cardiac cycle time
-  pr : REAL; //Interval between occurances of P and R
-  qt : REAL; //QT interval, duration of ventricular depolarization and repolarization
-  pp : REAL; //PP interval, duration of atrial full cycle
+  qrs   : REAL;     //QRS interval time, ventricular depolarization
+  p     : REAL;     //P wave time, atrial activation, depolarization, contraction
+  pv    : REAL;     //P potential
+  stt   : REAL;     //ST-T time, ventricular repolarization
+  u     : REAL;     //U wave time, after ventricular depolarizations
+  rr    : REAL;     //RR interval, indicator of cardiac cycle time
+  pr    : REAL;     //Interval between occurances of P and R
+  qt    : REAL;     //QT interval, duration of ventricular depolarization and repolarization
+  pp    : REAL;     //PP interval, duration of atrial full cycle
 END_VAR
 
 VAR_OUTPUT
-  diagnosis : REAL;
+  result : REAL;
 END_VAR
 
 FUZZIFY qrs
-  TERM good := (0, 1) (4, 0) ; 
-  TERM bad := (1, 0) (4,1) (6,1) (9,0);
-  TERM dangerous := (6, 0) (9, 1);
-  TERM abnormal := (6, 0) (9, 1);
+  TERM normal := sigm -4 120; 
+  TERM bad := sigm 4 120;
 END_FUZZIFY
 
-FUZZIFY p
-  TERM good := (0, 1) (4, 0) ; 
-  TERM bad := (1, 0) (4,1) (6,1) (9,0);
-  TERM dangerous := (6, 0) (9, 1);
-  TERM abnormal := (6, 0) (9, 1);
-END_FUZZIFY
-
-FUZZIFY stt
-  TERM good := (0, 1) (4, 0) ; 
-  TERM bad := (1, 0) (4,1) (6,1) (9,0);
-  TERM dangerous := (6, 0) (9, 1);
-  TERM abnormal := (6, 0) (9, 1);
-END_FUZZIFY
-
-FUZZIFY u
-  TERM normal := (0, 1) (4, 0) ; 
-  TERM bad := (1, 0) (4,1) (6,1) (9,0);
-  TERM dangerous := (6, 0) (9, 1);
-  TERM abnormal := (6, 0) (9, 1);
+FUZZIFY pv
+  TERM absent := (0, 0) (0.6, 0.6)
+  TERM present := (0.6, 0.6) (1, 1);
 END_FUZZIFY
 
 FUZZIFY rr
-  TERM good := (0, 1) (4, 0) ; 
-  TERM bad := (1, 0) (4,1) (6,1) (9,0);
-  TERM dangerous := (6, 0) (9, 1);
-  TERM abnormal := (6, 0) (9, 1);
+  TERM normal := gbell 2 400 1335 ; 
+  TERM fast := sigm -4 1000;
+  TERM slow := sigm 4 1700;
 END_FUZZIFY
 
 FUZZIFY pr
-  TERM good := (0, 1) (4, 0) ; 
-  TERM bad := (1, 0) (4,1) (6,1) (9,0);
-  TERM dangerous := (6, 0) (9, 1);
-  TERM abnormal := (6, 0) (9, 1);
+  TERM normal := gauss 2 45 160 ; 
+  TERM short := sigm -4 120;
+  TERM long := sigm 4 200;
 END_FUZZIFY
 
-FUZZIFY qt
-  TERM good := (0, 1) (4, 0) ; 
-  TERM bad := (1, 0) (4,1) (6,1) (9,0);
-  TERM dangerous := (6, 0) (9, 1);
-  TERM abnormal := (6, 0) (9, 1);
-END_FUZZIFY
+DEFUZZIFY result
+  TERM nsr := 1;
+  TERM cardiopathy := 0; 
+  METHOD : LM;
+  DEFAULT := 0;
+END_DEFUZZIFY
 
-FUZZIFY pp
-  TERM good := (0, 1) (4, 0) ; 
-  TERM bad := (1, 0) (4,1) (6,1) (9,0);
-  TERM dangerous := (6, 0) (9, 1);
-  TERM abnormal := (6, 0) (9, 1);
-END_FUZZIFY
+RULEBLOCK No1
+    AND : MIN;
+    ACT : MIN;
+    ACCU : MAX;
+    RULE 1 : IF qrs IS normal AND rr IS normal AND pr IS normal AND pv IS present 
+                THEN result IS nsr;
+    RULE 2 : IF qrs IS bad OR rr IS slow OR rr IS fast OR pr IS normal OR pv IS absent 
+                THEN result IS cardiopathy;
+END_RULEBLOCK
 
+END_FUNCTION_BLOCK
+
+FUNCTION_BLOCK lead1
+  
 END_FUNCTION_BLOCK
