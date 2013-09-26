@@ -87,7 +87,7 @@ public class ImageJTest implements PlugInFilter {
       System.out.println("Kurtosis " + kurtosis);
       System.out.println("Angle " + angle);
       System.out.println("Median " + median);
-      System.out.println("Mean " + median);
+      System.out.println("Mean " + mean);
       System.out.println("before : " + Arrays.toString(proc.getHistogram()));
       proc.threshold(45);
       proc.sharpen();
