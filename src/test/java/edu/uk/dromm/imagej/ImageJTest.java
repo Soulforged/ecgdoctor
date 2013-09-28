@@ -73,8 +73,6 @@ public class ImageJTest implements PlugInFilter {
     try {
       final BinaryProcessor proc = new BinaryProcessor(
           (ByteProcessor) ip.convertToByte(false));
-      ImageIO.write(ip.getBufferedImage(), "png", new File(stringOut
-          + "byte.png"));
       System.out.println(String.format("Histogram: %s, %s, %s",
           proc.getHistogramSize(), proc.getHistogramMax(),
           proc.getHistogramMin()));
@@ -91,12 +89,13 @@ public class ImageJTest implements PlugInFilter {
       System.out.println("Median " + median);
       System.out.println("Mean " + mean);
       System.out.println("before : " + Arrays.toString(proc.getHistogram()));
-      // proc.threshold((int) mean);
       final int thresh = calculate(proc.getHistogram(), proc.getPixelCount());
+      //      proc.sharpen();
+      //      proc.dilate();
       proc.threshold(thresh);
-      proc.sharpen();
-      proc.dilate();
-      // proc.filter(ImageProcessor.FIND_EDGES);
+      proc.findEdges();
+      proc.filter(ImageProcessor.MEDIAN_FILTER);
+      proc.invert();
       System.out.println("after : " + Arrays.toString(proc.getHistogram()));
       ImageIO.write(ip.getBufferedImage(), "png", new File("target/pure.png"));
       ImageIO.write(proc.getBufferedImage(), "png", outFile);
@@ -107,13 +106,12 @@ public class ImageJTest implements PlugInFilter {
 
   private int calculate(final int[] h, final int total) {
     int count = 0;
-    final double prop = 0.01;
+    final double prop = 0.02;
     for (int i = 0; i < h.length; i++) {
       count += h[i];
       final double ratio = (double) count / (double) total;
-      if (prop - 0.0005 <= ratio && ratio <= prop + 0.0005) {
+      if (prop - 0.0005 <= ratio && ratio <= prop + 0.0005)
         return i;
-      }
     }
     return -1;
   }
