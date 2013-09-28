@@ -13,6 +13,8 @@ import edu.uk.dromm.img.ImageProcess;
 
 public class HistogramSegmentation implements ImageProcess {
 
+  private final double proportion = 0.01;
+
   public HistogramSegmentation() {
   }
 
@@ -30,10 +32,17 @@ public class HistogramSegmentation implements ImageProcess {
     @Override
     public void run(final ImageProcessor ip) {
       final int[] histogram = ip.getHistogram();
-      final int localMax = 0;
-      for (int i = 0; i < histogram.length; i++) {
+      final double total = ip.getPixelCount();
+      int count = 0;
+      int current = 0;
+      for (current = 0; current < histogram.length; current++) {
+        count += histogram[current];
+        final double ratio = count / total;
+        if (proportion - 0.0005 <= ratio && ratio <= proportion + 0.0005) {
+          break;
+        }
       }
-      ip.threshold(45);
+      ip.threshold(current);
     }
 
     @Override

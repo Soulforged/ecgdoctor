@@ -65,7 +65,7 @@ public class ImageJTest implements PlugInFilter {
    */
   @Override
   public void run(final ImageProcessor ip) {
-    doRun(ip, "Dani.png");
+    // doRun(ip, "Dani.png");
   }
 
   private void doRun(final ImageProcessor ip, final String stringOut) {
@@ -73,6 +73,8 @@ public class ImageJTest implements PlugInFilter {
     try {
       final BinaryProcessor proc = new BinaryProcessor(
           (ByteProcessor) ip.convertToByte(false));
+      ImageIO.write(ip.getBufferedImage(), "png", new File(stringOut
+          + "byte.png"));
       System.out.println(String.format("Histogram: %s, %s, %s",
           proc.getHistogramSize(), proc.getHistogramMax(),
           proc.getHistogramMin()));
@@ -87,10 +89,14 @@ public class ImageJTest implements PlugInFilter {
       System.out.println("Kurtosis " + kurtosis);
       System.out.println("Angle " + angle);
       System.out.println("Median " + median);
-      System.out.println("Mean " + median);
+      System.out.println("Mean " + mean);
       System.out.println("before : " + Arrays.toString(proc.getHistogram()));
-      proc.threshold(45);
+      // proc.threshold((int) mean);
+      final int thresh = calculate(proc.getHistogram(), proc.getPixelCount());
+      proc.threshold(thresh);
       proc.sharpen();
+      proc.dilate();
+      // proc.filter(ImageProcessor.FIND_EDGES);
       System.out.println("after : " + Arrays.toString(proc.getHistogram()));
       ImageIO.write(ip.getBufferedImage(), "png", new File("target/pure.png"));
       ImageIO.write(proc.getBufferedImage(), "png", outFile);
@@ -99,11 +105,17 @@ public class ImageJTest implements PlugInFilter {
     }
   }
 
-  private double calculate(final int[] h) {
+  private int calculate(final int[] h, final int total) {
+    int count = 0;
+    final double prop = 0.01;
     for (int i = 0; i < h.length; i++) {
-
+      count += h[i];
+      final double ratio = (double) count / (double) total;
+      if (prop - 0.0005 <= ratio && ratio <= prop + 0.0005) {
+        return i;
+      }
     }
-    return 0.0;
+    return -1;
   }
 
   /*

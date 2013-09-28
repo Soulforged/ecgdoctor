@@ -23,7 +23,7 @@ FUZZIFY qrs
 END_FUZZIFY
 
 FUZZIFY pv
-  TERM absent := (0, 0) (0.6, 0.6)
+  TERM absent := (0, 0) (0.6, 0.6);
   TERM present := (0.6, 0.6) (1, 1);
 END_FUZZIFY
 
@@ -34,15 +34,15 @@ FUZZIFY rr
 END_FUZZIFY
 
 FUZZIFY pr
-  TERM normal := gauss 2 45 160 ; 
+  TERM normal := gauss 2 160; 
   TERM short := sigm -4 120;
   TERM long := sigm 4 200;
 END_FUZZIFY
 
 DEFUZZIFY result
   TERM nsr := 1;
-  TERM cardiopathy := 0;
-  METHOD : LM;
+  TERM cardiopathy := 0; 
+  METHOD : COGS;
   DEFAULT := 0;
 END_DEFUZZIFY
 
