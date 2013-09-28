@@ -38,7 +38,8 @@ public class HistogramSegmentation implements ImageProcess {
       for (current = 0; current < histogram.length; current++) {
         count += histogram[current];
         final double ratio = count / total;
-        if (proportion - 0.0005 <= ratio && ratio <= proportion + 0.0005) {
+        double epsilon = 0.0005;
+        if (proportion - epsilon <= ratio && ratio <= proportion + epsilon) {
           break;
         }
       }

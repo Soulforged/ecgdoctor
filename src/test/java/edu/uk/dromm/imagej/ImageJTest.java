@@ -47,6 +47,7 @@ public class ImageJTest implements PlugInFilter {
       BufferedImage bi = ImageIO.read(ecgImage);
       ImageProcessor ip = new ColorProcessor(bi);
       doRun(ip, "target/ecg-byn-out.png");
+
       ecgImage = this.getClass().getResource("/image/ecg-pink.jpg");
       Assert.assertNotNull(ecgImage);
       bi = ImageIO.read(ecgImage);
@@ -91,12 +92,9 @@ public class ImageJTest implements PlugInFilter {
       System.out.println("Median " + median);
       System.out.println("Mean " + mean);
       System.out.println("before : " + Arrays.toString(proc.getHistogram()));
-      // proc.threshold((int) mean);
       final int thresh = calculate(proc.getHistogram(), proc.getPixelCount());
       proc.threshold(thresh);
       proc.sharpen();
-      proc.dilate();
-      // proc.filter(ImageProcessor.FIND_EDGES);
       System.out.println("after : " + Arrays.toString(proc.getHistogram()));
       ImageIO.write(ip.getBufferedImage(), "png", new File("target/pure.png"));
       ImageIO.write(proc.getBufferedImage(), "png", outFile);
@@ -107,15 +105,20 @@ public class ImageJTest implements PlugInFilter {
 
   private int calculate(final int[] h, final int total) {
     int count = 0;
-    final double prop = 0.01;
+    final double prop = 0.014;
     for (int i = 0; i < h.length; i++) {
       count += h[i];
       final double ratio = (double) count / (double) total;
-      if (prop - 0.0005 <= ratio && ratio <= prop + 0.0005) {
+      final double epsilon = 0.0005;
+      if (prop - epsilon <= ratio && ratio <= prop + epsilon) {
         return i;
       }
     }
     return -1;
+  }
+
+  public void convertToCoordinate(final ImageProcessor imageProcessor) {
+
   }
 
   /*
