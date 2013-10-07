@@ -74,8 +74,6 @@ public class ImageJTest implements PlugInFilter {
     try {
       final BinaryProcessor proc = new BinaryProcessor(
           (ByteProcessor) ip.convertToByte(false));
-      ImageIO.write(ip.getBufferedImage(), "png", new File(stringOut
-          + "byte.png"));
       System.out.println(String.format("Histogram: %s, %s, %s",
           proc.getHistogramSize(), proc.getHistogramMax(),
           proc.getHistogramMin()));
@@ -85,17 +83,21 @@ public class ImageJTest implements PlugInFilter {
       final double angle = statistics.angle;
       final double kurtosis = statistics.kurtosis;
       final double stdDev = statistics.stdDev;
-      proc.setAntialiasedText(true);
       System.out.println("StdDev " + stdDev);
       System.out.println("Kurtosis " + kurtosis);
       System.out.println("Angle " + angle);
       System.out.println("Median " + median);
       System.out.println("Mean " + mean);
-      System.out.println("before : " + Arrays.toString(proc.getHistogram()));
+      System.out.println("Before : " + Arrays.toString(proc.getHistogram()));
       final int thresh = calculate(proc.getHistogram(), proc.getPixelCount());
       proc.threshold(thresh);
-      proc.sharpen();
-      System.out.println("after : " + Arrays.toString(proc.getHistogram()));
+      proc.findEdges();
+      for (int i = 0; i < 10; i++) {
+        proc.filter(ImageProcessor.MEDIAN_FILTER);
+      }
+      // final proc.convol
+      // proc.invert();
+      System.out.println("After : " + Arrays.toString(proc.getHistogram()));
       ImageIO.write(ip.getBufferedImage(), "png", new File("target/pure.png"));
       ImageIO.write(proc.getBufferedImage(), "png", outFile);
     } catch (final IOException e) {
@@ -103,9 +105,51 @@ public class ImageJTest implements PlugInFilter {
     }
   }
 
+  private void filter(final ImageProcessor ip, final int color) {
+    for (int i = 0; i < ip.getWidth(); i++) {
+      for (final int j = 0; j < ip.getHeight(); i++) {
+        final int p = ip.getPixel(i, j);
+
+      }
+    }
+  }
+
+  private int avg(final ImageProcessor ip, final int i, final int j) {
+    ip.getPixel(i, j);
+  }
+
+  private void gaussian(final ImageProcessor ip, final int kernelSize) {
+    final int width = ip.getWidth();
+    final int height = ip.getHeight();
+    final float avg[][] = new float[width][height];
+
+    final int kernel[][] = new int[kernelSize][kernelSize];
+    // TODO Initialize kernel
+    for (int row = (kernelSize - 1) / 2; row < width - (kernelSize - 1) / 2; row++) {
+      for (int col = (kernelSize - 1) / 2; col < height - (kernelSize - 1) / 2; col++) {
+        int kw = 1;
+        for (int m = -(kernelSize - 1) / 2; m <= (kernelSize - 1) / 2; m++) {
+          int kh = 1;
+          for (int n = -(kernelSize - 1) / 2; n <= (kernelSize - 1) / 2; n++) {
+            avg[row][col] += kernel[kernelSize - kw][kernelSize - kh]
+                * ip.getPixel(row + m, col + n);
+            kh++;
+          }
+          kw++;
+        }
+      }
+    }
+
+    for (int i = 0; i < avg.length; i++) {
+      for (final int j = 0; j < avg[i].length; i++) {
+        ip.putPixelValue(i, j, avg[i][j]);
+      }
+    }
+  }
+
   private int calculate(final int[] h, final int total) {
     int count = 0;
-    final double prop = 0.014;
+    final double prop = 0.022;
     for (int i = 0; i < h.length; i++) {
       count += h[i];
       final double ratio = (double) count / (double) total;
@@ -117,8 +161,10 @@ public class ImageJTest implements PlugInFilter {
     return -1;
   }
 
-  public void convertToCoordinate(final ImageProcessor imageProcessor) {
+  public void convertToCoordinate(final ImageProcessor ip) {
 
+    ip.getHeight();
+    ip.getWidth();
   }
 
   /*
