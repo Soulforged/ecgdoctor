@@ -5,6 +5,7 @@ package edu.uk.dromm.imagej;
 
 import ij.ImagePlus;
 import ij.plugin.filter.PlugInFilter;
+import ij.plugin.filter.Skeletonize3D;
 import ij.process.BinaryProcessor;
 import ij.process.ByteProcessor;
 import ij.process.ColorProcessor;
@@ -30,6 +31,7 @@ import org.junit.Test;
 public class ImageJTest implements PlugInFilter {
 
   private final int black = -16777216, white = -1;
+  private final Skeletonize3D sk3d = new Skeletonize3D();;
 
   @Test
   public void colorsFromBlackToWhiteToHexaAreSequential() {
@@ -96,7 +98,11 @@ public class ImageJTest implements PlugInFilter {
         proc.filter(ImageProcessor.MEDIAN_FILTER);
       }
       // final proc.convol
-      // proc.invert();
+      final Skeletonize3D sk3d = new Skeletonize3D();
+      sk3d.setup("", new ImagePlus("", proc));
+      sk3d.run(proc);
+      proc.invert();
+      // proc.skeletonize();
       System.out.println("After : " + Arrays.toString(proc.getHistogram()));
       ImageIO.write(ip.getBufferedImage(), "png", new File("target/pure.png"));
       ImageIO.write(proc.getBufferedImage(), "png", outFile);
@@ -112,10 +118,6 @@ public class ImageJTest implements PlugInFilter {
 
       }
     }
-  }
-
-  private int avg(final ImageProcessor ip, final int i, final int j) {
-    ip.getPixel(i, j);
   }
 
   private void gaussian(final ImageProcessor ip, final int kernelSize) {
@@ -174,6 +176,7 @@ public class ImageJTest implements PlugInFilter {
    */
   @Override
   public int setup(final String arg0, final ImagePlus arg1) {
+    sk3d.setup(arg0, arg1);
     return NO_CHANGES;
   }
 }
