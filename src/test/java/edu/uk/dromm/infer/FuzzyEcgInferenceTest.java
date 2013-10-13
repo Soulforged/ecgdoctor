@@ -38,4 +38,10 @@ public class FuzzyEcgInferenceTest {
     final Variable result = diagnosis.getVariable("result");
     Assert.assertEquals(1, result.getValue(), 0);
   }
+
+  @Test
+  public void chart(){
+    fis.chart();
+    while(true);
+  }
 }

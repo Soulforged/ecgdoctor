@@ -90,12 +90,12 @@ public class ImageJTest implements PlugInFilter {
       System.out.println("Mean " + mean);
       System.out.println("before : " + Arrays.toString(proc.getHistogram()));
       final int thresh = calculate(proc.getHistogram(), proc.getPixelCount());
-      //      proc.sharpen();
-      //      proc.dilate();
       proc.threshold(thresh);
       proc.findEdges();
-      proc.filter(ImageProcessor.MEDIAN_FILTER);
+      for(int i = 0; i < 20; i++)
+        proc.filter(ImageProcessor.MEDIAN_FILTER);
       proc.invert();
+      proc.setInterpolate(true);
       System.out.println("after : " + Arrays.toString(proc.getHistogram()));
       ImageIO.write(ip.getBufferedImage(), "png", new File("target/pure.png"));
       ImageIO.write(proc.getBufferedImage(), "png", outFile);
@@ -106,7 +106,7 @@ public class ImageJTest implements PlugInFilter {
 
   private int calculate(final int[] h, final int total) {
     int count = 0;
-    final double prop = 0.02;
+    final double prop = 0.015;
     for (int i = 0; i < h.length; i++) {
       count += h[i];
       final double ratio = (double) count / (double) total;

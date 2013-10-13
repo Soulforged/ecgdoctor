@@ -3,14 +3,14 @@ FUNCTION_BLOCK diagnosis
 //All time measures are done in milliseconds, all potential measures are done in millivolts
 VAR_INPUT
   qrs   : REAL;     //QRS interval time, ventricular depolarization
-  p     : REAL;     //P wave time, atrial activation, depolarization, contraction
+  //p     : REAL;     //P wave time, atrial activation, depolarization, contraction
   pv    : REAL;     //P potential
-  stt   : REAL;     //ST-T time, ventricular repolarization
-  u     : REAL;     //U wave time, after ventricular depolarizations
+  //stt   : REAL;     //ST-T time, ventricular repolarization
+  //u     : REAL;     //U wave time, after ventricular depolarizations
   rr    : REAL;     //RR interval, indicator of cardiac cycle time
   pr    : REAL;     //Interval between occurances of P and R
-  qt    : REAL;     //QT interval, duration of ventricular depolarization and repolarization
-  pp    : REAL;     //PP interval, duration of atrial full cycle
+  //qt    : REAL;     //QT interval, duration of ventricular depolarization and repolarization
+  //pp    : REAL;     //PP interval, duration of atrial full cycle
 END_VAR
 
 VAR_OUTPUT
@@ -28,9 +28,9 @@ FUZZIFY pv
 END_FUZZIFY
 
 FUZZIFY rr
-  TERM normal := gbell 2 400 1335 ; 
-  TERM fast := sigm -4 1000;
-  TERM slow := sigm 4 1700;
+  TERM normal := gbell 250 10 1335;
+  TERM fast := sigm -200 1000;
+  //TERM slow := sigm 400 1700;
 END_FUZZIFY
 
 FUZZIFY pr
@@ -47,13 +47,13 @@ DEFUZZIFY result
 END_DEFUZZIFY
 
 RULEBLOCK No1
-    AND : MIN;
-    ACT : MIN;
-    ACCU : MAX;
-    RULE 1 : IF qrs IS normal AND rr IS normal AND pr IS normal AND pv IS present 
-                THEN result IS nsr;
-    RULE 2 : IF qrs IS bad OR rr IS slow OR rr IS fast OR pr IS normal OR pv IS absent 
-                THEN result IS cardiopathy;
+  AND : MIN;
+  ACT : MIN;
+  ACCU : MAX;
+  RULE 1 : IF qrs IS normal AND rr IS normal AND pr IS normal AND pv IS present 
+              THEN result IS nsr;
+  RULE 2 : IF qrs IS bad OR rr IS slow OR rr IS fast OR pr IS normal OR pv IS absent 
+              THEN result IS cardiopathy;
 END_RULEBLOCK
 
 END_FUNCTION_BLOCK
