@@ -21,9 +21,9 @@ import edu.uk.dromm.img.ImageProcess;
  * @author dicardo
  * 
  */
-public class HistogramSegmentationTest {
+public class ECGImagePreprocessingTest {
 
-  private final ImageProcess histogramSegmentation = new HistogramSegmentation();
+  private final ImageProcess histogramSegmentation = new ECGImagePreprocessing();
 
   @Test
   public void processLeadsToATwoBitImage() {

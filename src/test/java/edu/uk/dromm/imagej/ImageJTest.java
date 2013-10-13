@@ -5,6 +5,7 @@ package edu.uk.dromm.imagej;
 
 import ij.ImagePlus;
 import ij.plugin.filter.PlugInFilter;
+import ij.plugin.filter.Skeletonize3D;
 import ij.process.BinaryProcessor;
 import ij.process.ByteProcessor;
 import ij.process.ColorProcessor;
@@ -30,6 +31,7 @@ import org.junit.Test;
 public class ImageJTest implements PlugInFilter {
 
   private final int black = -16777216, white = -1;
+  private final Skeletonize3D sk3d = new Skeletonize3D();;
 
   @Test
   public void colorsFromBlackToWhiteToHexaAreSequential() {
@@ -47,6 +49,7 @@ public class ImageJTest implements PlugInFilter {
       BufferedImage bi = ImageIO.read(ecgImage);
       ImageProcessor ip = new ColorProcessor(bi);
       doRun(ip, "target/ecg-byn-out.png");
+
       ecgImage = this.getClass().getResource("/image/ecg-pink.jpg");
       Assert.assertNotNull(ecgImage);
       bi = ImageIO.read(ecgImage);
@@ -88,15 +91,22 @@ public class ImageJTest implements PlugInFilter {
       System.out.println("Angle " + angle);
       System.out.println("Median " + median);
       System.out.println("Mean " + mean);
-      System.out.println("before : " + Arrays.toString(proc.getHistogram()));
+      System.out.println("Before : " + Arrays.toString(proc.getHistogram()));
       final int thresh = calculate(proc.getHistogram(), proc.getPixelCount());
+      //      proc.sharpen();
+      //      proc.dilate();
       proc.threshold(thresh);
       proc.findEdges();
-      for(int i = 0; i < 20; i++)
+      for (int i = 0; i < 10; i++) {
         proc.filter(ImageProcessor.MEDIAN_FILTER);
+      }
+      // final proc.convol
+      final Skeletonize3D sk3d = new Skeletonize3D();
+      sk3d.setup("", new ImagePlus("", proc));
+      sk3d.run(proc);
       proc.invert();
-      proc.setInterpolate(true);
-      System.out.println("after : " + Arrays.toString(proc.getHistogram()));
+      // proc.skeletonize();
+      System.out.println("After : " + Arrays.toString(proc.getHistogram()));
       ImageIO.write(ip.getBufferedImage(), "png", new File("target/pure.png"));
       ImageIO.write(proc.getBufferedImage(), "png", outFile);
     } catch (final IOException e) {
@@ -104,16 +114,62 @@ public class ImageJTest implements PlugInFilter {
     }
   }
 
+  private void filter(final ImageProcessor ip, final int color) {
+    for (int i = 0; i < ip.getWidth(); i++) {
+      for (final int j = 0; j < ip.getHeight(); i++) {
+        final int p = ip.getPixel(i, j);
+
+      }
+    }
+  }
+
+  private void gaussian(final ImageProcessor ip, final int kernelSize) {
+    final int width = ip.getWidth();
+    final int height = ip.getHeight();
+    final float avg[][] = new float[width][height];
+
+    final int kernel[][] = new int[kernelSize][kernelSize];
+    // TODO Initialize kernel
+    for (int row = (kernelSize - 1) / 2; row < width - (kernelSize - 1) / 2; row++) {
+      for (int col = (kernelSize - 1) / 2; col < height - (kernelSize - 1) / 2; col++) {
+        int kw = 1;
+        for (int m = -(kernelSize - 1) / 2; m <= (kernelSize - 1) / 2; m++) {
+          int kh = 1;
+          for (int n = -(kernelSize - 1) / 2; n <= (kernelSize - 1) / 2; n++) {
+            avg[row][col] += kernel[kernelSize - kw][kernelSize - kh]
+                * ip.getPixel(row + m, col + n);
+            kh++;
+          }
+          kw++;
+        }
+      }
+    }
+
+    for (int i = 0; i < avg.length; i++) {
+      for (final int j = 0; j < avg[i].length; i++) {
+        ip.putPixelValue(i, j, avg[i][j]);
+      }
+    }
+  }
+
   private int calculate(final int[] h, final int total) {
     int count = 0;
-    final double prop = 0.015;
+    final double prop = 0.022;
     for (int i = 0; i < h.length; i++) {
       count += h[i];
       final double ratio = (double) count / (double) total;
-      if (prop - 0.0005 <= ratio && ratio <= prop + 0.0005)
+      final double epsilon = 0.0005;
+      if (prop - epsilon <= ratio && ratio <= prop + epsilon) {
         return i;
+      }
     }
     return -1;
+  }
+
+  public void convertToCoordinate(final ImageProcessor ip) {
+
+    ip.getHeight();
+    ip.getWidth();
   }
 
   /*
@@ -123,6 +179,7 @@ public class ImageJTest implements PlugInFilter {
    */
   @Override
   public int setup(final String arg0, final ImagePlus arg1) {
+    sk3d.setup(arg0, arg1);
     return NO_CHANGES;
   }
 }

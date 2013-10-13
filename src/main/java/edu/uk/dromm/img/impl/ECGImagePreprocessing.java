@@ -11,11 +11,11 @@ import java.awt.image.BufferedImage;
 
 import edu.uk.dromm.img.ImageProcess;
 
-public class HistogramSegmentation implements ImageProcess {
+public class ECGImagePreprocessing implements ImageProcess {
 
-  private final double proportion = 0.01;
+  private final double proportion = 0.022;
 
-  public HistogramSegmentation() {
+  public ECGImagePreprocessing() {
   }
 
   @Override
@@ -31,18 +31,26 @@ public class HistogramSegmentation implements ImageProcess {
 
     @Override
     public void run(final ImageProcessor ip) {
-      final int[] histogram = ip.getHistogram();
-      final double total = ip.getPixelCount();
+      final BinaryProcessor bp = (BinaryProcessor) ip;
+      final int[] histogram = bp.getHistogram();
+      final double total = bp.getPixelCount();
       int count = 0;
       int current = 0;
       for (current = 0; current < histogram.length; current++) {
         count += histogram[current];
         final double ratio = count / total;
-        if (proportion - 0.0005 <= ratio && ratio <= proportion + 0.0005) {
+        final double epsilon = 0.0005;
+        if (proportion - epsilon <= ratio && ratio <= proportion + epsilon) {
           break;
         }
       }
-      ip.threshold(current);
+      bp.threshold(current);
+      bp.findEdges();
+      for (int i = 0; i < 10; i++) {
+        bp.filter(ImageProcessor.MEDIAN_FILTER);
+      }
+      bp.invert();
+      bp.skeletonize();
     }
 
     @Override
