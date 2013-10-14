@@ -4,6 +4,7 @@
 package edu.uk.dromm.imagej;
 
 import ij.ImagePlus;
+import ij.plugin.filter.BackgroundSubtracter;
 import ij.plugin.filter.PlugInFilter;
 import ij.plugin.filter.Skeletonize3D;
 import ij.process.BinaryProcessor;
@@ -93,34 +94,35 @@ public class ImageJTest implements PlugInFilter {
       System.out.println("Mean " + mean);
       System.out.println("Before : " + Arrays.toString(proc.getHistogram()));
       final int thresh = calculate(proc.getHistogram(), proc.getPixelCount());
-      //      proc.sharpen();
-      //      proc.dilate();
+      final ImagePlus imp = new ImagePlus("", proc);
+      final BackgroundSubtracter bsubs = new BackgroundSubtracter();
+      bsubs.setup("", imp);
+      bsubs.rollingBallBackground(proc, 0.2, false, true, true, false, true);
+      ImageIO.write(proc.getBufferedImage(), "png", new File(outFile.getPath().replaceAll(".png", "-bkg.png")));
       proc.threshold(thresh);
+      ImageIO.write(proc.getBufferedImage(), "png", new File(outFile.getPath().replaceAll(".png", "-thresh.png")));
       proc.findEdges();
-      for (int i = 0; i < 10; i++) {
+      ImageIO.write(proc.getBufferedImage(), "png", new File(outFile.getPath().replaceAll(".png", "-edges.png")));
+      for (int i = 0; i < 10; i++)
         proc.filter(ImageProcessor.MEDIAN_FILTER);
-      }
-      // final proc.convol
-      final Skeletonize3D sk3d = new Skeletonize3D();
-      sk3d.setup("", new ImagePlus("", proc));
-      sk3d.run(proc);
+      ImageIO.write(proc.getBufferedImage(), "png", new File(outFile.getPath().replaceAll(".png", "-filtered.png")));
+      //      final Skeletonize3D sk3d = new Skeletonize3D();
+      //      sk3d.setup("", imp);
+      //      sk3d.run(proc);
       proc.invert();
-      // proc.skeletonize();
+      //      proc.skeletonize();
+      //      ImageIO.write(proc.getBufferedImage(), "png", new File(outFile.getPath().replaceAll(".png", "-ske.png")));
       System.out.println("After : " + Arrays.toString(proc.getHistogram()));
-      ImageIO.write(ip.getBufferedImage(), "png", new File("target/pure.png"));
+      ImageIO.write(ip.getBufferedImage(), "png", new File(outFile.getPath().replaceAll(".png", "-pure.png")));
       ImageIO.write(proc.getBufferedImage(), "png", outFile);
     } catch (final IOException e) {
       e.printStackTrace();
     }
   }
 
-  private void filter(final ImageProcessor ip, final int color) {
-    for (int i = 0; i < ip.getWidth(); i++) {
-      for (final int j = 0; j < ip.getHeight(); i++) {
-        final int p = ip.getPixel(i, j);
-
-      }
-    }
+  private void run(final PlugInFilter it, final ImageProcessor proc, final int times){
+    for(int i =0; i < times; i++)
+      it.run(proc);
   }
 
   private void gaussian(final ImageProcessor ip, final int kernelSize) {
@@ -130,7 +132,7 @@ public class ImageJTest implements PlugInFilter {
 
     final int kernel[][] = new int[kernelSize][kernelSize];
     // TODO Initialize kernel
-    for (int row = (kernelSize - 1) / 2; row < width - (kernelSize - 1) / 2; row++) {
+    for (int row = (kernelSize - 1) / 2; row < width - (kernelSize - 1) / 2; row++)
       for (int col = (kernelSize - 1) / 2; col < height - (kernelSize - 1) / 2; col++) {
         int kw = 1;
         for (int m = -(kernelSize - 1) / 2; m <= (kernelSize - 1) / 2; m++) {
@@ -143,13 +145,10 @@ public class ImageJTest implements PlugInFilter {
           kw++;
         }
       }
-    }
 
-    for (int i = 0; i < avg.length; i++) {
-      for (final int j = 0; j < avg[i].length; i++) {
+    for (int i = 0; i < avg.length; i++)
+      for (final int j = 0; j < avg[i].length; i++)
         ip.putPixelValue(i, j, avg[i][j]);
-      }
-    }
   }
 
   private int calculate(final int[] h, final int total) {
@@ -159,9 +158,8 @@ public class ImageJTest implements PlugInFilter {
       count += h[i];
       final double ratio = (double) count / (double) total;
       final double epsilon = 0.0005;
-      if (prop - epsilon <= ratio && ratio <= prop + epsilon) {
+      if (prop - epsilon <= ratio && ratio <= prop + epsilon)
         return i;
-      }
     }
     return -1;
   }

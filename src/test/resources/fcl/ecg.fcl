@@ -1,6 +1,6 @@
 FUNCTION_BLOCK diagnosis
 
-//All time measures are done in milliseconds, all potential measures are done in millivolts
+//All time measures are done in milliseconds, all electrical measures are done in millivolts
 VAR_INPUT
   qrs   : REAL;     //QRS interval time, ventricular depolarization
   //p     : REAL;     //P wave time, atrial activation, depolarization, contraction
@@ -8,7 +8,7 @@ VAR_INPUT
   //stt   : REAL;     //ST-T time, ventricular repolarization
   //u     : REAL;     //U wave time, after ventricular depolarizations
   rr    : REAL;     //RR interval, indicator of cardiac cycle time
-  pr    : REAL;     //Interval between occurances of P and R
+  pr    : REAL;     //Interval between the beggining of P and R
   //qt    : REAL;     //QT interval, duration of ventricular depolarization and repolarization
   //pp    : REAL;     //PP interval, duration of atrial full cycle
 END_VAR
@@ -17,26 +17,27 @@ VAR_OUTPUT
   result : REAL;
 END_VAR
 
-FUZZIFY qrs
-  TERM normal := sigm -4 120; 
-  TERM bad := sigm 4 120;
+FUZZIFY rr
+  TERM normal := gbell 342 10 1335;
+  TERM short := sigm -0.02 1000;
+  TERM long := sigm 0.02 1675;
 END_FUZZIFY
 
 FUZZIFY pv
-  TERM absent := (0, 0) (0.6, 0.6);
-  TERM present := (0.6, 0.6) (1, 1);
+  TERM absent := (0.0, 1.0) (0.6, 0.0);
+  TERM present := (0.6, 0.0) (1.0, 1.0);
 END_FUZZIFY
 
-FUZZIFY rr
-  TERM normal := gbell 250 10 1335;
-  TERM fast := sigm -200 1000;
-  //TERM slow := sigm 400 1700;
+FUZZIFY qrs
+  TERM short := sigm -0.4 110;
+  TERM normal := gauss 120 10;
+  TERM long := sigm 0.4 130;
 END_FUZZIFY
 
 FUZZIFY pr
-  TERM normal := gauss 2 160; 
-  TERM short := sigm -4 120;
-  TERM long := sigm 4 200;
+  TERM normal := gauss 160 40; 
+  TERM short := sigm -0.045 10;
+  TERM long := sigm 0.045 310;
 END_FUZZIFY
 
 DEFUZZIFY result
@@ -52,7 +53,7 @@ RULEBLOCK No1
   ACCU : MAX;
   RULE 1 : IF qrs IS normal AND rr IS normal AND pr IS normal AND pv IS present 
               THEN result IS nsr;
-  RULE 2 : IF qrs IS bad OR rr IS slow OR rr IS fast OR pr IS normal OR pv IS absent 
+  RULE 2 : IF qrs IS short OR qrs IS long OR rr IS long OR rr IS short OR pr IS short OR pr IS long OR pv IS absent 
               THEN result IS cardiopathy;
 END_RULEBLOCK
 
