@@ -44,13 +44,14 @@ public class ECGImagePreprocessing implements ImageProcess {
           break;
         }
       }
+      bp.medianFilter();
+      bp.dilate();
+      bp.noise(10d);
+      bp.dilate();
       bp.threshold(current);
-      bp.findEdges();
-      for (int i = 0; i < 10; i++) {
-        bp.filter(ImageProcessor.MEDIAN_FILTER);
-      }
-      bp.invert();
       bp.skeletonize();
+      bp.threshold(current);
+      bp.threshold(current);
     }
 
     @Override
