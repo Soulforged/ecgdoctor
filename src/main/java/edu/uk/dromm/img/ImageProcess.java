@@ -4,5 +4,5 @@ import java.awt.image.BufferedImage;
 
 public interface ImageProcess {
 
-	BufferedImage process(BufferedImage bi);
+  BufferedImage process(BufferedImage bi);
 }

@@ -31,7 +31,7 @@ public class ECGImagePreprocessingTest {
       final URL ecgImage = this.getClass().getResource("/image/ecg-byn.jpg");
       Assert.assertNotNull(ecgImage);
       final BufferedImage bi = ImageIO.read(ecgImage);
-      final BufferedImage result = histogramSegmentation.process(bi);
+      BufferedImage result = histogramSegmentation.process(bi);
       final ImageProcessor ip = new ColorProcessor(result);
       final int[] histogram = ip.getHistogram();
       Assert.assertTrue(histogram[0] > 0);

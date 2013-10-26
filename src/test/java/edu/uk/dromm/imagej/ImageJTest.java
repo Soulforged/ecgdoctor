@@ -4,7 +4,6 @@
 package edu.uk.dromm.imagej;
 
 import ij.ImagePlus;
-import ij.plugin.filter.BackgroundSubtracter;
 import ij.plugin.filter.PlugInFilter;
 import ij.plugin.filter.Skeletonize3D;
 import ij.process.BinaryProcessor;
@@ -42,7 +41,7 @@ public class ImageJTest implements PlugInFilter {
     Assert.assertEquals(white, Color.WHITE.getRGB());
   }
 
-  @Test
+  // @Test
   public void process() {
     try {
       URL ecgImage = this.getClass().getResource("/image/ecg-byn.jpg");
@@ -59,6 +58,100 @@ public class ImageJTest implements PlugInFilter {
     } catch (final IOException e) {
       Assert.fail(e.getLocalizedMessage());
       e.printStackTrace();
+    }
+  }
+
+  @Test
+  public void processingTools() {
+    final String[] imagePathsToProcess = new String[] { "ecg-byn", "ecg-pink" };
+    try {
+      for (final String imagePath : imagePathsToProcess) {
+        final URL ecgImage = this.getClass().getResource(
+            "/image/" + imagePath + ".jpg");
+        final BufferedImage bi = ImageIO.read(ecgImage);
+        final ImageProcessor ip = new ColorProcessor(bi);
+        BinaryProcessor bp = new BinaryProcessor(
+            (ByteProcessor) ip.convertToByte(false));
+        final int thresh = calculate(bp.getHistogram(), bp.getPixelCount());
+        bp.autoThreshold();
+        ImageIO.write(bp.getBufferedImage(), "png", new File("target/"
+            + imagePath + "-autothresh.png"));
+        bp = new BinaryProcessor((ByteProcessor) ip.convertToByte(false));
+        bp.erode();
+        ImageIO.write(bp.getBufferedImage(), "png", new File("target/"
+            + imagePath + "-erode.png"));
+        bp = new BinaryProcessor((ByteProcessor) ip.convertToByte(false));
+        bp.and(255);
+        ImageIO.write(bp.getBufferedImage(), "png", new File("target/"
+            + imagePath + "-and255.png"));
+        bp = new BinaryProcessor((ByteProcessor) ip.convertToByte(false));
+        bp.and(0);
+        ImageIO.write(bp.getBufferedImage(), "png", new File("target/"
+            + imagePath + "-and0.png"));
+        bp = new BinaryProcessor((ByteProcessor) ip.convertToByte(false));
+        bp.erode(2, 255);
+        ImageIO.write(bp.getBufferedImage(), "png", new File("target/"
+            + imagePath + "-erode.2.255.png"));
+        bp = new BinaryProcessor((ByteProcessor) ip.convertToByte(false));
+        bp.filter(ImageProcessor.BILINEAR);
+        ImageIO.write(bp.getBufferedImage(), "png", new File("target/"
+            + imagePath + "-bilinear.png"));
+        bp = new BinaryProcessor((ByteProcessor) ip.convertToByte(false));
+        bp.filter(ImageProcessor.BICUBIC);
+        ImageIO.write(bp.getBufferedImage(), "png", new File("target/"
+            + imagePath + "-bicubic.png"));
+        bp = new BinaryProcessor((ByteProcessor) ip.convertToByte(false));
+        bp.filter(ImageProcessor.BLUR_MORE);
+        ImageIO.write(bp.getBufferedImage(), "png", new File("target/"
+            + imagePath + "-blurmore.png"));
+        bp = new BinaryProcessor((ByteProcessor) ip.convertToByte(false));
+        bp.filter(ImageProcessor.CENTER_JUSTIFY);
+        ImageIO.write(bp.getBufferedImage(), "png", new File("target/"
+            + imagePath + "-centerjustify.png"));
+        bp = new BinaryProcessor((ByteProcessor) ip.convertToByte(false));
+        bp.filter(ImageProcessor.ISODATA);
+        ImageIO.write(bp.getBufferedImage(), "png", new File("target/"
+            + imagePath + "-isodata.png"));
+        bp = new BinaryProcessor((ByteProcessor) ip.convertToByte(false));
+        bp.filter(ImageProcessor.ISODATA2);
+        ImageIO.write(bp.getBufferedImage(), "png", new File("target/"
+            + imagePath + "-isodata2.png"));
+        bp = new BinaryProcessor((ByteProcessor) ip.convertToByte(false));
+        bp.filter(ImageProcessor.LEFT_JUSTIFY);
+        ImageIO.write(bp.getBufferedImage(), "png", new File("target/"
+            + imagePath + "-leftjustify.png"));
+        bp = new BinaryProcessor((ByteProcessor) ip.convertToByte(false));
+        bp.filter(ImageProcessor.RIGHT_JUSTIFY);
+        ImageIO.write(bp.getBufferedImage(), "png", new File("target/"
+            + imagePath + "-rightjustify.png"));
+        bp = new BinaryProcessor((ByteProcessor) ip.convertToByte(false));
+        bp.filter(ImageProcessor.MAX);
+        ImageIO.write(bp.getBufferedImage(), "png", new File("target/"
+            + imagePath + "-max.png"));
+        bp = new BinaryProcessor((ByteProcessor) ip.convertToByte(false));
+        bp.filter(ImageProcessor.MIN);
+        ImageIO.write(bp.getBufferedImage(), "png", new File("target/"
+            + imagePath + "-min.png"));
+        bp = new BinaryProcessor((ByteProcessor) ip.convertToByte(false));
+        bp.filter(ImageProcessor.MEDIAN_FILTER);
+        ImageIO.write(bp.getBufferedImage(), "png", new File("target/"
+            + imagePath + "-median.png"));
+        bp = new BinaryProcessor((ByteProcessor) ip.convertToByte(false));
+        bp.findEdges();
+        ImageIO.write(bp.getBufferedImage(), "png", new File("target/"
+            + imagePath + "-edges.png"));
+        bp = new BinaryProcessor((ByteProcessor) ip.convertToByte(false));
+        bp.noise(10d);
+        ImageIO.write(bp.getBufferedImage(), "png", new File("target/"
+            + imagePath + "-noise10d.png"));
+        bp = new BinaryProcessor((ByteProcessor) ip.convertToByte(false));
+        bp.outline();
+        ImageIO.write(bp.getBufferedImage(), "png", new File("target/"
+            + imagePath + "-outline.png"));
+      }
+    } catch (final Exception e) {
+      e.printStackTrace();
+      Assert.fail(e.getMessage());
     }
   }
 
@@ -95,60 +188,54 @@ public class ImageJTest implements PlugInFilter {
       System.out.println("Before : " + Arrays.toString(proc.getHistogram()));
       final int thresh = calculate(proc.getHistogram(), proc.getPixelCount());
       final ImagePlus imp = new ImagePlus("", proc);
-      final BackgroundSubtracter bsubs = new BackgroundSubtracter();
-      bsubs.setup("", imp);
-      bsubs.rollingBallBackground(proc, 0.2, false, true, true, false, true);
-      ImageIO.write(proc.getBufferedImage(), "png", new File(outFile.getPath().replaceAll(".png", "-bkg.png")));
+      // final BackgroundSubtracter bsubs = new BackgroundSubtracter();
+      // bsubs.setup("", imp);
+      // bsubs.rollingBallBackground(proc, 0.2, false, true, true, false, true);
+      ImageIO.write(proc.getBufferedImage(), "png", new File(outFile.getPath()
+          .replaceAll(".png", "-bkg.png")));
+      // proc.filter(ImageProcessor.MEDIAN_FILTER);
+      // proc.medianFilter();
+      // proc.medianFilter();
+      // proc.medianFilter();
+      // proc.medianFilter();
+      // proc.medianFilter();
+      // proc.autoThreshold();
+      proc.smooth();
       proc.threshold(thresh);
-      ImageIO.write(proc.getBufferedImage(), "png", new File(outFile.getPath().replaceAll(".png", "-thresh.png")));
-      proc.findEdges();
-      ImageIO.write(proc.getBufferedImage(), "png", new File(outFile.getPath().replaceAll(".png", "-edges.png")));
-      for (int i = 0; i < 10; i++)
-        proc.filter(ImageProcessor.MEDIAN_FILTER);
-      ImageIO.write(proc.getBufferedImage(), "png", new File(outFile.getPath().replaceAll(".png", "-filtered.png")));
-      //      final Skeletonize3D sk3d = new Skeletonize3D();
-      //      sk3d.setup("", imp);
-      //      sk3d.run(proc);
-      proc.invert();
-      //      proc.skeletonize();
-      //      ImageIO.write(proc.getBufferedImage(), "png", new File(outFile.getPath().replaceAll(".png", "-ske.png")));
-      System.out.println("After : " + Arrays.toString(proc.getHistogram()));
-      ImageIO.write(ip.getBufferedImage(), "png", new File(outFile.getPath().replaceAll(".png", "-pure.png")));
-      ImageIO.write(proc.getBufferedImage(), "png", outFile);
+      proc.skeletonize();
+      // proc.dilate();
+      // for (int i = 0; i < 1; i++) {
+      // proc.medianFilter();
+      // }
+      proc.skeletonize();
+      // proc.threshold(thresh);
+      // proc.threshold(thresh);
+      ImageIO.write(proc.getBufferedImage(), "png", new File(outFile.getPath()
+          .replaceAll(".png", "-thresh.png")));
+      // ImageIO.write(proc.getBufferedImage(), "png", new
+      // File(outFile.getPath()
+      // .replaceAll(".png", "-edges.png")));
+      // for (int i = 0; i < 10; i++) {
+      // proc.filter(ImageProcessor.MEDIAN_FILTER);
+      // }
+      // ImageIO.write(proc.getBufferedImage(), "png", new
+      // File(outFile.getPath()
+      // .replaceAll(".png", "-filtered.png")));
+      // final Skeletonize3D sk3d = new Skeletonize3D();
+      // sk3d.setup("", imp);
+      // sk3d.run(proc);
+      // proc.invert();
+      // proc.skeletonize();
+      // ImageIO.write(proc.getBufferedImage(), "png", new
+      // File(outFile.getPath()
+      // .replaceAll(".png", "-ske.png")));
+      // System.out.println("After : " + Arrays.toString(proc.getHistogram()));
+      // ImageIO.write(ip.getBufferedImage(), "png", new File(outFile.getPath()
+      // .replaceAll(".png", "-pure.png")));
+      // ImageIO.write(proc.getBufferedImage(), "png", outFile);
     } catch (final IOException e) {
       e.printStackTrace();
     }
-  }
-
-  private void run(final PlugInFilter it, final ImageProcessor proc, final int times){
-    for(int i =0; i < times; i++)
-      it.run(proc);
-  }
-
-  private void gaussian(final ImageProcessor ip, final int kernelSize) {
-    final int width = ip.getWidth();
-    final int height = ip.getHeight();
-    final float avg[][] = new float[width][height];
-
-    final int kernel[][] = new int[kernelSize][kernelSize];
-    // TODO Initialize kernel
-    for (int row = (kernelSize - 1) / 2; row < width - (kernelSize - 1) / 2; row++)
-      for (int col = (kernelSize - 1) / 2; col < height - (kernelSize - 1) / 2; col++) {
-        int kw = 1;
-        for (int m = -(kernelSize - 1) / 2; m <= (kernelSize - 1) / 2; m++) {
-          int kh = 1;
-          for (int n = -(kernelSize - 1) / 2; n <= (kernelSize - 1) / 2; n++) {
-            avg[row][col] += kernel[kernelSize - kw][kernelSize - kh]
-                * ip.getPixel(row + m, col + n);
-            kh++;
-          }
-          kw++;
-        }
-      }
-
-    for (int i = 0; i < avg.length; i++)
-      for (final int j = 0; j < avg[i].length; i++)
-        ip.putPixelValue(i, j, avg[i][j]);
   }
 
   private int calculate(final int[] h, final int total) {
@@ -158,8 +245,9 @@ public class ImageJTest implements PlugInFilter {
       count += h[i];
       final double ratio = (double) count / (double) total;
       final double epsilon = 0.0005;
-      if (prop - epsilon <= ratio && ratio <= prop + epsilon)
+      if (prop - epsilon <= ratio && ratio <= prop + epsilon) {
         return i;
+      }
     }
     return -1;
   }
