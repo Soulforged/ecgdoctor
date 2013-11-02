@@ -41,7 +41,7 @@ public class ImageJTest implements PlugInFilter {
     Assert.assertEquals(white, Color.WHITE.getRGB());
   }
 
-  // @Test
+  @Test
   public void process() {
     try {
       URL ecgImage = this.getClass().getResource("/image/ecg-byn.jpg");
@@ -207,6 +207,14 @@ public class ImageJTest implements PlugInFilter {
       // for (int i = 0; i < 1; i++) {
       // proc.medianFilter();
       // }
+      proc.medianFilter();
+      proc.dilate();
+      proc.noise(10d);
+      proc.dilate();
+      proc.threshold(thresh);
+      proc.skeletonize();
+      proc.threshold(thresh);
+      proc.threshold(thresh);
       proc.skeletonize();
       // proc.threshold(thresh);
       // proc.threshold(thresh);

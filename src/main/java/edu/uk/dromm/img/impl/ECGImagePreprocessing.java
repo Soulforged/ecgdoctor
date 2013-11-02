@@ -50,8 +50,6 @@ public class ECGImagePreprocessing implements ImageProcess {
       bp.dilate();
       bp.threshold(current);
       bp.skeletonize();
-      bp.threshold(current);
-      bp.threshold(current);
     }
 
     @Override

@@ -17,7 +17,9 @@ import java.util.List;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.Predicate;
 
+import edu.uk.dromm.imagej.ECGPoint;
 import edu.uk.dromm.img.ImageProcess;
+import fractsplinewavelets.FractSplineWavelets;
 
 /**
  * @author magian
@@ -48,7 +50,7 @@ public class ECGImageAnalisys implements ImageProcess {
       for (int h = 0; h < ip.getHeight(); h++) {
         final int p = ip.getPixel(w, h);
         if (p == blackValue) {
-          points.add(new Point(w, h));
+          points.add(new ECGPoint(w, h));
         }
       }
     }
@@ -67,10 +69,25 @@ public class ECGImageAnalisys implements ImageProcess {
     System.out.println("Max dist X: " + (lastPoint.getX() - firstPoint.getX()));
     System.out.println("Max Y: " + ip.getHeight());
     System.out.println("Max dist Y: " + (lastPoint.getY() - firstPoint.getY()));
+    System.out.println("Size on first line: " + pointsOnFirstLine.size());
     System.out.println("Points on first line: "
         + Arrays.toString(pointsOnFirstLine.toArray()));
     // TODO Encontrar picos y guardar sus coordenadas
+    drawTableXY(points);
+
+    final FractSplineWavelets fractSplineWavelets = new FractSplineWavelets();
+    // fractSplineWavelets.
+
     return ip.getBufferedImage();
   }
 
+  /**
+   * @param points
+   */
+  private void drawTableXY(final List<Point> points) {
+    System.out.println("x,y");
+    for (final Point point : points) {
+      System.out.println(point.getX() + "," + point.getY());
+    }
+  }
 }
