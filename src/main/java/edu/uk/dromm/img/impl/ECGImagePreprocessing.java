@@ -2,6 +2,7 @@ package edu.uk.dromm.img.impl;
 
 import ij.ImagePlus;
 import ij.plugin.filter.PlugInFilter;
+import ij.process.AutoThresholder;
 import ij.process.BinaryProcessor;
 import ij.process.ByteProcessor;
 import ij.process.ColorProcessor;
@@ -9,13 +10,16 @@ import ij.process.ImageProcessor;
 
 import java.awt.image.BufferedImage;
 
+import edu.uk.dromm.img.Factory;
+import edu.uk.dromm.img.ImageParameterProvider;
 import edu.uk.dromm.img.ImageProcess;
 
 public class ECGImagePreprocessing implements ImageProcess {
 
-  private final double proportion = 0.022;
+  private final ImageParameterProvider ipp;
 
   public ECGImagePreprocessing() {
+    ipp = new Factory().getImageParameterProvider();
   }
 
   @Override
@@ -32,22 +36,13 @@ public class ECGImagePreprocessing implements ImageProcess {
     @Override
     public void run(final ImageProcessor ip) {
       final BinaryProcessor bp = (BinaryProcessor) ip;
-      final int[] histogram = bp.getHistogram();
-      final double total = bp.getPixelCount();
-      int count = 0;
-      int current = 0;
-      for (current = 0; current < histogram.length; current++) {
-        count += histogram[current];
-        final double ratio = count / total;
-        final double epsilon = 0.0005;
-        if (proportion - epsilon <= ratio && ratio <= proportion + epsilon)
-          break;
-      }
-      bp.medianFilter();
-      bp.dilate();
-      bp.noise(10d);
-      bp.dilate();
-      bp.threshold(current);
+      final AutoThresholder thresholder = new AutoThresholder();
+      int threshold = thresholder.getThreshold(ipp.thresholdMethod(bp.getStatistics()), bp.getHistogram());
+      bp.threshold(threshold);
+      for(int i = 0; i < 5; i++)
+        bp.filter(ImageProcessor.BLUR_MORE);
+      threshold = thresholder.getThreshold(ipp.thresholdMethod(bp.getStatistics()), bp.getHistogram());
+      bp.threshold(threshold);
       bp.skeletonize();
     }
 
