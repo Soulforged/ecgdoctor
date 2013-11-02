@@ -1,7 +1,7 @@
 /**
  * 
  */
-package edu.uk.dromm.imagej;
+package edu.uk.dromm.img;
 
 import java.awt.Point;
 

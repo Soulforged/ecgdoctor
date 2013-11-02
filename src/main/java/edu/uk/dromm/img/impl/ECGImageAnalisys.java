@@ -17,7 +17,7 @@ import java.util.List;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.Predicate;
 
-import edu.uk.dromm.imagej.ECGPoint;
+import edu.uk.dromm.img.ECGPoint;
 import edu.uk.dromm.img.ImageProcess;
 import fractsplinewavelets.FractSplineWavelets;
 

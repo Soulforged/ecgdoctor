@@ -64,6 +64,13 @@
 			<systemPath>${basedir}/src/main/resources/lib/wfdb.jar</systemPath>
 		</dependency>
 		<dependency>
+			<groupId>fractsoplinewavelets</groupId>
+			<artifactId>fractsoplinewavelets</artifactId>
+			<version>1.0.0</version>
+			<scope>system</scope>
+			<systemPath>${basedir}/src/main/resources/lib/Fractional_Splines_Wavelets.jar</systemPath>
+		</dependency>
+		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
 			<version>4.11</version>
