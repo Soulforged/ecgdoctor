@@ -253,7 +253,7 @@ public class ImageJTest implements PlugInFilter {
       final AutoThresholder thresholder = new AutoThresholder();
       int threshold = thresholder.getThreshold(ipp.thresholdMethod(proc.getStatistics()), proc.getHistogram());
       proc.threshold(threshold);
-      for(int i = 0; i < 3; i++)
+      for(int i = 0; i < 5; i++)
         proc.filter(ImageProcessor.BLUR_MORE);
       threshold = thresholder.getThreshold(ipp.thresholdMethod(proc.getStatistics()), proc.getHistogram());
       proc.threshold(threshold);
