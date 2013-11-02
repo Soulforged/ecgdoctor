@@ -9,7 +9,7 @@ public class DefaultImageParameterProvider implements ImageParameterProvider {
   @Override
   public Method thresholdMethod(final ImageStatistics is) {
     if(is.mean > 220)
-      return Method.RenyiEntropy;
+      return Method.Intermodes;
     return Method.Minimum;
   }
 

@@ -18,7 +18,8 @@ VAR_OUTPUT
 END_VAR
 
 FUZZIFY rr
-  TERM normal := gbell 342 10 1335;
+  TERM normal := gbell 342 10 750;
+  TERM steady := gbell 342 10 1100;
   TERM short := sigm -0.02 1000;
   TERM long := sigm 0.02 1675;
 END_FUZZIFY

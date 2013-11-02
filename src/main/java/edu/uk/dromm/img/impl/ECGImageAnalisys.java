@@ -76,7 +76,6 @@ public class ECGImageAnalisys implements ImageProcess {
     drawTableXY(points);
 
     final FractSplineWavelets fractSplineWavelets = new FractSplineWavelets();
-    // fractSplineWavelets.
 
     return ip.getBufferedImage();
   }

@@ -40,9 +40,8 @@ public class ECGImagePreprocessing implements ImageProcess {
         count += histogram[current];
         final double ratio = count / total;
         final double epsilon = 0.0005;
-        if (proportion - epsilon <= ratio && ratio <= proportion + epsilon) {
+        if (proportion - epsilon <= ratio && ratio <= proportion + epsilon)
           break;
-        }
       }
       bp.medianFilter();
       bp.dilate();

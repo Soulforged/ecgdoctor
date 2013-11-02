@@ -73,68 +73,59 @@ public class ImageJTest implements PlugInFilter {
   }
 
   @Test
-  public void filtering() {
+  public void filtering(){
     final String[] imagePathsToProcess = new String[] { "ecg-byn", "ecg-pink" };
     try {
       final Map<Integer, String> iToName = new HashMap<Integer, String>();
-      iToName.put(0, "blur");
-      iToName.put(1, "edges");
-      iToName.put(2, "median");
-      iToName.put(3, "min");
-      iToName.put(4, "max");
-      iToName.put(5, "convolve");
-      for (final String imagePath : imagePathsToProcess) {
+      iToName.put(0, "blur");iToName.put(1, "edges");
+      iToName.put(2, "median");iToName.put(3, "min");
+      iToName.put(4, "max");iToName.put(5, "convolve");
+      for(final String imagePath : imagePathsToProcess){
         final URL ecgImage = this.getClass().getResource(
             "/image/" + imagePath + ".jpg");
         final BufferedImage bi = ImageIO.read(ecgImage);
         final ImageProcessor ip = new ColorProcessor(bi);
-        for (int i = 0; i < 6; i++) {
+        for(int i = 0; i < 6; i++){
           final BinaryProcessor bp = new BinaryProcessor(
               (ByteProcessor) ip.convertToByte(false));
           bp.filter(i);
           ImageIO.write(bp.getBufferedImage(), "png", new File("target/"
-              + imagePath + "-" + iToName.get(i) + ".png"));
+              + imagePath + "-" + iToName.get(i) +".png"));
         }
       }
-    } catch (final Exception e) {
+    }catch (final Exception e) {
       e.printStackTrace();
       Assert.fail(e.getMessage());
     }
   }
 
   @Test
-  public void thresholding() {
+  public void thresholding(){
     final String[] imagePathsToProcess = new String[] { "ecg-byn", "ecg-pink" };
     try {
       final List<ThresholdMethodStatistics> methodStats = new ArrayList<ThresholdMethodStatistics>();
-      for (final String imagePath : imagePathsToProcess) {
+      for(final String imagePath : imagePathsToProcess){
         final URL ecgImage = this.getClass().getResource(
             "/image/" + imagePath + ".jpg");
         final BufferedImage bi = ImageIO.read(ecgImage);
         final ImageProcessor ip = new ColorProcessor(bi);
-        for (final Method threshMethod : AutoThresholder.Method.values()) {
+        for(final Method threshMethod : AutoThresholder.Method.values()){
           final BinaryProcessor bp = new BinaryProcessor(
               (ByteProcessor) ip.convertToByte(false));
-          final int thresh = new AutoThresholder().getThreshold(threshMethod,
-              bp.getHistogram());
-          methodStats.add(new ThresholdMethodStatistics(thresh, threshMethod
-              .name()));
-          System.out.println(String.format("%s thresh: %s", threshMethod,
-              thresh));
+          final int thresh = new AutoThresholder().getThreshold(threshMethod, bp.getHistogram());
+          methodStats.add(new ThresholdMethodStatistics(thresh, threshMethod.name()));
+          System.out.println(String.format("%s thresh: %s", threshMethod, thresh));
           bp.threshold(thresh);
-          System.out.println(String.format("%s histogram: %s", threshMethod,
-              Arrays.toString(bp.getHistogram())));
+          System.out.println(String.format("%s histogram: %s", threshMethod, Arrays.toString(bp.getHistogram())));
           ImageIO.write(bp.getBufferedImage(), "png", new File("target/"
-              + imagePath + "-autothresh-"
-              + threshMethod.toString().toLowerCase() + ".png"));
+              + imagePath + "-autothresh-" + threshMethod.toString().toLowerCase() +".png"));
         }
         Collections.sort(methodStats);
         System.out.println("THRESHOLD STATISTICS");
-        for (final ThresholdMethodStatistics tms : methodStats) {
+        for(final ThresholdMethodStatistics tms : methodStats)
           System.out.println(tms);
-        }
       }
-    } catch (final Exception e) {
+    }catch(final Exception e){
       e.printStackTrace();
       Assert.fail(e.getMessage());
     }
@@ -260,13 +251,13 @@ public class ImageJTest implements PlugInFilter {
       printStatistics(proc);
       System.out.println("Before : " + Arrays.toString(proc.getHistogram()));
       final AutoThresholder thresholder = new AutoThresholder();
-      final int threshold = thresholder.getThreshold(
-          ipp.thresholdMethod(proc.getStatistics()), proc.getHistogram());
+      int threshold = thresholder.getThreshold(ipp.thresholdMethod(proc.getStatistics()), proc.getHistogram());
       proc.threshold(threshold);
-      proc.filter(ImageProcessor.MIN);
-      proc.erode(1, 255);
-      // proc.filter(ImageProcessor.MEDIAN_FILTER);
-      // proc.skeletonize();
+      for(int i = 0; i < 3; i++)
+        proc.filter(ImageProcessor.BLUR_MORE);
+      threshold = thresholder.getThreshold(ipp.thresholdMethod(proc.getStatistics()), proc.getHistogram());
+      proc.threshold(threshold);
+      proc.skeletonize();
       System.out.println("After : " + Arrays.toString(proc.getHistogram()));
       ImageIO.write(ip.getBufferedImage(), "png", new File(outFile.getPath()
           .replaceAll(".png", "-pure.png")));
@@ -276,20 +267,20 @@ public class ImageJTest implements PlugInFilter {
     }
   }
 
-  private void printStatistics(final ImageProcessor ip) {
+  private void printStatistics(final ImageProcessor ip){
     System.out.println(String.format("Histogram: %s, %s, %s",
-        ip.getHistogramSize(), ip.getHistogramMax(), ip.getHistogramMin()));
+        ip.getHistogramSize(), ip.getHistogramMax(),
+        ip.getHistogramMin()));
     final ImageStatistics ips = ip.getStatistics();
     final Field[] stats = ImageStatistics.class.getDeclaredFields();
-    for (final Field f : stats) {
+    for(final Field f : stats)
       try {
         f.setAccessible(true);
-        System.out.println(String.format("%s: %s", f.getName(), f.get(ips)));
+        System.out.println(String.format("%s: %s",f.getName() ,f.get(ips)));
         f.setAccessible(false);
       } catch (final Exception e) {
         e.printStackTrace();
       }
-    }
   }
 
   /*
@@ -303,11 +294,9 @@ public class ImageJTest implements PlugInFilter {
     return NO_CHANGES;
   }
 
-  class ThresholdMethodStatistics implements
-      Comparable<ThresholdMethodStatistics> {
+  class ThresholdMethodStatistics implements Comparable<ThresholdMethodStatistics>{
     private final int thresh;
     private final String name;
-
     public ThresholdMethodStatistics(final int thresh, final String name) {
       super();
       this.thresh = thresh;
@@ -330,11 +319,10 @@ public class ImageJTest implements PlugInFilter {
 
     @Override
     public int compareTo(final ThresholdMethodStatistics o) {
-      if (o.getThresh() > thresh) {
+      if(o.getThresh() > thresh)
         return 1;
-      } else if (o.getThresh() < thresh) {
+      else if (o.getThresh() < thresh)
         return -1;
-      }
       return 0;
     }
   }
