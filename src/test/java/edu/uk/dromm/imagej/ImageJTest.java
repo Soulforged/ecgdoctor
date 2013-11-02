@@ -251,12 +251,13 @@ public class ImageJTest implements PlugInFilter {
       printStatistics(proc);
       System.out.println("Before : " + Arrays.toString(proc.getHistogram()));
       final AutoThresholder thresholder = new AutoThresholder();
-      final int threshold = thresholder.getThreshold(ipp.thresholdMethod(proc.getStatistics()), proc.getHistogram());
+      int threshold = thresholder.getThreshold(ipp.thresholdMethod(proc.getStatistics()), proc.getHistogram());
       proc.threshold(threshold);
-      proc.filter(ImageProcessor.MIN);
-      proc.erode(1,255);
-      //      proc.filter(ImageProcessor.MEDIAN_FILTER);
-      //      proc.skeletonize();
+      for(int i = 0; i < 3; i++)
+        proc.filter(ImageProcessor.BLUR_MORE);
+      threshold = thresholder.getThreshold(ipp.thresholdMethod(proc.getStatistics()), proc.getHistogram());
+      proc.threshold(threshold);
+      proc.skeletonize();
       System.out.println("After : " + Arrays.toString(proc.getHistogram()));
       ImageIO.write(ip.getBufferedImage(), "png", new File(outFile.getPath()
           .replaceAll(".png", "-pure.png")));

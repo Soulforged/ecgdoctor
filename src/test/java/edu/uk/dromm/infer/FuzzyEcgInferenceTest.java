@@ -86,6 +86,7 @@ public class FuzzyEcgInferenceTest {
     Assert.assertEquals("PR membership should be near " + prexp, prexp, prmemb, 0.01);
   }
 
+  @Test
   public void chart(){
     fis.chart();
     while(true);
