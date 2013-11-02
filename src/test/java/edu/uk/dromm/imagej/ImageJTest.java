@@ -6,6 +6,8 @@ package edu.uk.dromm.imagej;
 import ij.ImagePlus;
 import ij.plugin.filter.PlugInFilter;
 import ij.plugin.filter.Skeletonize3D;
+import ij.process.AutoThresholder;
+import ij.process.AutoThresholder.Method;
 import ij.process.BinaryProcessor;
 import ij.process.ByteProcessor;
 import ij.process.ColorProcessor;
@@ -16,13 +18,22 @@ import java.awt.Color;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.Field;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import javax.imageio.ImageIO;
 
 import org.junit.Assert;
 import org.junit.Test;
+
+import edu.uk.dromm.img.Factory;
+import edu.uk.dromm.img.ImageParameterProvider;
 
 /**
  * @author dicardo
@@ -41,7 +52,7 @@ public class ImageJTest implements PlugInFilter {
     Assert.assertEquals(white, Color.WHITE.getRGB());
   }
 
-  // @Test
+  @Test
   public void process() {
     try {
       URL ecgImage = this.getClass().getResource("/image/ecg-byn.jpg");
@@ -62,6 +73,65 @@ public class ImageJTest implements PlugInFilter {
   }
 
   @Test
+  public void filtering(){
+    final String[] imagePathsToProcess = new String[] { "ecg-byn", "ecg-pink" };
+    try {
+      final Map<Integer, String> iToName = new HashMap<Integer, String>();
+      iToName.put(0, "blur");iToName.put(1, "edges");
+      iToName.put(2, "median");iToName.put(3, "min");
+      iToName.put(4, "max");iToName.put(5, "convolve");
+      for(final String imagePath : imagePathsToProcess){
+        final URL ecgImage = this.getClass().getResource(
+            "/image/" + imagePath + ".jpg");
+        final BufferedImage bi = ImageIO.read(ecgImage);
+        final ImageProcessor ip = new ColorProcessor(bi);
+        for(int i = 0; i < 6; i++){
+          final BinaryProcessor bp = new BinaryProcessor(
+              (ByteProcessor) ip.convertToByte(false));
+          bp.filter(i);
+          ImageIO.write(bp.getBufferedImage(), "png", new File("target/"
+              + imagePath + "-" + iToName.get(i) +".png"));
+        }
+      }
+    }catch (final Exception e) {
+      e.printStackTrace();
+      Assert.fail(e.getMessage());
+    }
+  }
+
+  @Test
+  public void thresholding(){
+    final String[] imagePathsToProcess = new String[] { "ecg-byn", "ecg-pink" };
+    try {
+      final List<ThresholdMethodStatistics> methodStats = new ArrayList<ThresholdMethodStatistics>();
+      for(final String imagePath : imagePathsToProcess){
+        final URL ecgImage = this.getClass().getResource(
+            "/image/" + imagePath + ".jpg");
+        final BufferedImage bi = ImageIO.read(ecgImage);
+        final ImageProcessor ip = new ColorProcessor(bi);
+        for(final Method threshMethod : AutoThresholder.Method.values()){
+          final BinaryProcessor bp = new BinaryProcessor(
+              (ByteProcessor) ip.convertToByte(false));
+          final int thresh = new AutoThresholder().getThreshold(threshMethod, bp.getHistogram());
+          methodStats.add(new ThresholdMethodStatistics(thresh, threshMethod.name()));
+          System.out.println(String.format("%s thresh: %s", threshMethod, thresh));
+          bp.threshold(thresh);
+          System.out.println(String.format("%s histogram: %s", threshMethod, Arrays.toString(bp.getHistogram())));
+          ImageIO.write(bp.getBufferedImage(), "png", new File("target/"
+              + imagePath + "-autothresh-" + threshMethod.toString().toLowerCase() +".png"));
+        }
+        Collections.sort(methodStats);
+        System.out.println("THRESHOLD STATISTICS");
+        for(final ThresholdMethodStatistics tms : methodStats)
+          System.out.println(tms);
+      }
+    }catch(final Exception e){
+      e.printStackTrace();
+      Assert.fail(e.getMessage());
+    }
+  }
+
+  @Test
   public void processingTools() {
     final String[] imagePathsToProcess = new String[] { "ecg-byn", "ecg-pink" };
     try {
@@ -72,7 +142,6 @@ public class ImageJTest implements PlugInFilter {
         final ImageProcessor ip = new ColorProcessor(bi);
         BinaryProcessor bp = new BinaryProcessor(
             (ByteProcessor) ip.convertToByte(false));
-        final int thresh = calculate(bp.getHistogram(), bp.getPixelCount());
         bp.autoThreshold();
         ImageIO.write(bp.getBufferedImage(), "png", new File("target/"
             + imagePath + "-autothresh.png"));
@@ -93,50 +162,6 @@ public class ImageJTest implements PlugInFilter {
         ImageIO.write(bp.getBufferedImage(), "png", new File("target/"
             + imagePath + "-erode.2.255.png"));
         bp = new BinaryProcessor((ByteProcessor) ip.convertToByte(false));
-        bp.filter(ImageProcessor.BILINEAR);
-        ImageIO.write(bp.getBufferedImage(), "png", new File("target/"
-            + imagePath + "-bilinear.png"));
-        bp = new BinaryProcessor((ByteProcessor) ip.convertToByte(false));
-        bp.filter(ImageProcessor.BICUBIC);
-        ImageIO.write(bp.getBufferedImage(), "png", new File("target/"
-            + imagePath + "-bicubic.png"));
-        bp = new BinaryProcessor((ByteProcessor) ip.convertToByte(false));
-        bp.filter(ImageProcessor.BLUR_MORE);
-        ImageIO.write(bp.getBufferedImage(), "png", new File("target/"
-            + imagePath + "-blurmore.png"));
-        bp = new BinaryProcessor((ByteProcessor) ip.convertToByte(false));
-        bp.filter(ImageProcessor.CENTER_JUSTIFY);
-        ImageIO.write(bp.getBufferedImage(), "png", new File("target/"
-            + imagePath + "-centerjustify.png"));
-        bp = new BinaryProcessor((ByteProcessor) ip.convertToByte(false));
-        bp.filter(ImageProcessor.ISODATA);
-        ImageIO.write(bp.getBufferedImage(), "png", new File("target/"
-            + imagePath + "-isodata.png"));
-        bp = new BinaryProcessor((ByteProcessor) ip.convertToByte(false));
-        bp.filter(ImageProcessor.ISODATA2);
-        ImageIO.write(bp.getBufferedImage(), "png", new File("target/"
-            + imagePath + "-isodata2.png"));
-        bp = new BinaryProcessor((ByteProcessor) ip.convertToByte(false));
-        bp.filter(ImageProcessor.LEFT_JUSTIFY);
-        ImageIO.write(bp.getBufferedImage(), "png", new File("target/"
-            + imagePath + "-leftjustify.png"));
-        bp = new BinaryProcessor((ByteProcessor) ip.convertToByte(false));
-        bp.filter(ImageProcessor.RIGHT_JUSTIFY);
-        ImageIO.write(bp.getBufferedImage(), "png", new File("target/"
-            + imagePath + "-rightjustify.png"));
-        bp = new BinaryProcessor((ByteProcessor) ip.convertToByte(false));
-        bp.filter(ImageProcessor.MAX);
-        ImageIO.write(bp.getBufferedImage(), "png", new File("target/"
-            + imagePath + "-max.png"));
-        bp = new BinaryProcessor((ByteProcessor) ip.convertToByte(false));
-        bp.filter(ImageProcessor.MIN);
-        ImageIO.write(bp.getBufferedImage(), "png", new File("target/"
-            + imagePath + "-min.png"));
-        bp = new BinaryProcessor((ByteProcessor) ip.convertToByte(false));
-        bp.filter(ImageProcessor.MEDIAN_FILTER);
-        ImageIO.write(bp.getBufferedImage(), "png", new File("target/"
-            + imagePath + "-median.png"));
-        bp = new BinaryProcessor((ByteProcessor) ip.convertToByte(false));
         bp.findEdges();
         ImageIO.write(bp.getBufferedImage(), "png", new File("target/"
             + imagePath + "-edges.png"));
@@ -148,6 +173,54 @@ public class ImageJTest implements PlugInFilter {
         bp.outline();
         ImageIO.write(bp.getBufferedImage(), "png", new File("target/"
             + imagePath + "-outline.png"));
+        bp = new BinaryProcessor((ByteProcessor) ip.convertToByte(false));
+        bp.setAntialiasedText(true);
+        ImageIO.write(bp.getBufferedImage(), "png", new File("target/"
+            + imagePath + "-aatext.png"));
+        bp = new BinaryProcessor((ByteProcessor) ip.convertToByte(false));
+        bp.setLineWidth(1);
+        ImageIO.write(bp.getBufferedImage(), "png", new File("target/"
+            + imagePath + "-line1.png"));
+        bp = new BinaryProcessor((ByteProcessor) ip.convertToByte(false));
+        bp.sharpen();
+        ImageIO.write(bp.getBufferedImage(), "png", new File("target/"
+            + imagePath + "-sharpen.png"));
+        bp = new BinaryProcessor((ByteProcessor) ip.convertToByte(false));
+        bp.skeletonize();
+        ImageIO.write(bp.getBufferedImage(), "png", new File("target/"
+            + imagePath + "-ske.png"));
+        bp = new BinaryProcessor((ByteProcessor) ip.convertToByte(false));
+        bp.smooth();
+        ImageIO.write(bp.getBufferedImage(), "png", new File("target/"
+            + imagePath + "-smooth.png"));
+        bp = new BinaryProcessor((ByteProcessor) ip.convertToByte(false));
+        bp.subtract(255d);
+        ImageIO.write(bp.getBufferedImage(), "png", new File("target/"
+            + imagePath + "-substract255.png"));
+        bp = new BinaryProcessor((ByteProcessor) ip.convertToByte(false));
+        bp.subtract(ip.getStatistics().mean);
+        ImageIO.write(bp.getBufferedImage(), "png", new File("target/"
+            + imagePath + "-substract-mean.png"));
+        bp = new BinaryProcessor((ByteProcessor) ip.convertToByte(false));
+        bp.subtract(ip.getStatistics().median);
+        ImageIO.write(bp.getBufferedImage(), "png", new File("target/"
+            + imagePath + "-substract-median.png"));
+        bp = new BinaryProcessor((ByteProcessor) ip.convertToByte(false));
+        bp.xor(255);
+        ImageIO.write(bp.getBufferedImage(), "png", new File("target/"
+            + imagePath + "-substract-xor255.png"));
+        bp = new BinaryProcessor((ByteProcessor) ip.convertToByte(false));
+        bp.xor(0);
+        ImageIO.write(bp.getBufferedImage(), "png", new File("target/"
+            + imagePath + "-substract-xor0.png"));
+        bp = new BinaryProcessor((ByteProcessor) ip.convertToByte(false));
+        bp.or(0);
+        ImageIO.write(bp.getBufferedImage(), "png", new File("target/"
+            + imagePath + "-substract-or0.png"));
+        bp = new BinaryProcessor((ByteProcessor) ip.convertToByte(false));
+        bp.or(255);
+        ImageIO.write(bp.getBufferedImage(), "png", new File("target/"
+            + imagePath + "-substract-or255.png"));
       }
     } catch (final Exception e) {
       e.printStackTrace();
@@ -167,95 +240,46 @@ public class ImageJTest implements PlugInFilter {
 
   private void doRun(final ImageProcessor ip, final String stringOut) {
     final File outFile = new File(stringOut);
+    final Factory factory = new Factory();
+    final ImageParameterProvider ipp = factory.getImageParameterProvider();
     try {
+      System.out.println("BEFORE");
+      printStatistics(ip);
       final BinaryProcessor proc = new BinaryProcessor(
           (ByteProcessor) ip.convertToByte(false));
-      System.out.println(String.format("Histogram: %s, %s, %s",
-          proc.getHistogramSize(), proc.getHistogramMax(),
-          proc.getHistogramMin()));
-      final ImageStatistics statistics = proc.getStatistics();
-      final double median = statistics.median;
-      final double mean = statistics.mean;
-      final double angle = statistics.angle;
-      final double kurtosis = statistics.kurtosis;
-      final double stdDev = statistics.stdDev;
-      proc.setAntialiasedText(true);
-      System.out.println("StdDev " + stdDev);
-      System.out.println("Kurtosis " + kurtosis);
-      System.out.println("Angle " + angle);
-      System.out.println("Median " + median);
-      System.out.println("Mean " + mean);
+      System.out.println("AFTER");
+      printStatistics(proc);
       System.out.println("Before : " + Arrays.toString(proc.getHistogram()));
-      final int thresh = calculate(proc.getHistogram(), proc.getPixelCount());
-      final ImagePlus imp = new ImagePlus("", proc);
-      // final BackgroundSubtracter bsubs = new BackgroundSubtracter();
-      // bsubs.setup("", imp);
-      // bsubs.rollingBallBackground(proc, 0.2, false, true, true, false, true);
-      ImageIO.write(proc.getBufferedImage(), "png", new File(outFile.getPath()
-          .replaceAll(".png", "-bkg.png")));
-      // proc.filter(ImageProcessor.MEDIAN_FILTER);
-      // proc.medianFilter();
-      // proc.medianFilter();
-      // proc.medianFilter();
-      // proc.medianFilter();
-      // proc.medianFilter();
-      // proc.autoThreshold();
-      proc.smooth();
-      proc.threshold(thresh);
-      proc.skeletonize();
-      // proc.dilate();
-      // for (int i = 0; i < 1; i++) {
-      // proc.medianFilter();
-      // }
-      proc.skeletonize();
-      // proc.threshold(thresh);
-      // proc.threshold(thresh);
-      ImageIO.write(proc.getBufferedImage(), "png", new File(outFile.getPath()
-          .replaceAll(".png", "-thresh.png")));
-      // ImageIO.write(proc.getBufferedImage(), "png", new
-      // File(outFile.getPath()
-      // .replaceAll(".png", "-edges.png")));
-      // for (int i = 0; i < 10; i++) {
-      // proc.filter(ImageProcessor.MEDIAN_FILTER);
-      // }
-      // ImageIO.write(proc.getBufferedImage(), "png", new
-      // File(outFile.getPath()
-      // .replaceAll(".png", "-filtered.png")));
-      // final Skeletonize3D sk3d = new Skeletonize3D();
-      // sk3d.setup("", imp);
-      // sk3d.run(proc);
-      // proc.invert();
-      // proc.skeletonize();
-      // ImageIO.write(proc.getBufferedImage(), "png", new
-      // File(outFile.getPath()
-      // .replaceAll(".png", "-ske.png")));
-      // System.out.println("After : " + Arrays.toString(proc.getHistogram()));
-      // ImageIO.write(ip.getBufferedImage(), "png", new File(outFile.getPath()
-      // .replaceAll(".png", "-pure.png")));
-      // ImageIO.write(proc.getBufferedImage(), "png", outFile);
+      final AutoThresholder thresholder = new AutoThresholder();
+      final int threshold = thresholder.getThreshold(ipp.thresholdMethod(proc.getStatistics()), proc.getHistogram());
+      proc.threshold(threshold);
+      proc.filter(ImageProcessor.MIN);
+      proc.erode(1,255);
+      //      proc.filter(ImageProcessor.MEDIAN_FILTER);
+      //      proc.skeletonize();
+      System.out.println("After : " + Arrays.toString(proc.getHistogram()));
+      ImageIO.write(ip.getBufferedImage(), "png", new File(outFile.getPath()
+          .replaceAll(".png", "-pure.png")));
+      ImageIO.write(proc.getBufferedImage(), "png", outFile);
     } catch (final IOException e) {
       e.printStackTrace();
     }
   }
 
-  private int calculate(final int[] h, final int total) {
-    int count = 0;
-    final double prop = 0.022;
-    for (int i = 0; i < h.length; i++) {
-      count += h[i];
-      final double ratio = (double) count / (double) total;
-      final double epsilon = 0.0005;
-      if (prop - epsilon <= ratio && ratio <= prop + epsilon) {
-        return i;
+  private void printStatistics(final ImageProcessor ip){
+    System.out.println(String.format("Histogram: %s, %s, %s",
+        ip.getHistogramSize(), ip.getHistogramMax(),
+        ip.getHistogramMin()));
+    final ImageStatistics ips = ip.getStatistics();
+    final Field[] stats = ImageStatistics.class.getDeclaredFields();
+    for(final Field f : stats)
+      try {
+        f.setAccessible(true);
+        System.out.println(String.format("%s: %s",f.getName() ,f.get(ips)));
+        f.setAccessible(false);
+      } catch (final Exception e) {
+        e.printStackTrace();
       }
-    }
-    return -1;
-  }
-
-  public void convertToCoordinate(final ImageProcessor ip) {
-
-    ip.getHeight();
-    ip.getWidth();
   }
 
   /*
@@ -267,5 +291,38 @@ public class ImageJTest implements PlugInFilter {
   public int setup(final String arg0, final ImagePlus arg1) {
     sk3d.setup(arg0, arg1);
     return NO_CHANGES;
+  }
+
+  class ThresholdMethodStatistics implements Comparable<ThresholdMethodStatistics>{
+    private final int thresh;
+    private final String name;
+    public ThresholdMethodStatistics(final int thresh, final String name) {
+      super();
+      this.thresh = thresh;
+      this.name = name;
+    }
+
+    public String getName() {
+      return name;
+    }
+
+    public int getThresh() {
+      return thresh;
+    }
+
+    @Override
+    public String toString() {
+      return "ThresholdMethodStatistics [thresh=" + thresh + ", name=" + name
+          + "]";
+    }
+
+    @Override
+    public int compareTo(final ThresholdMethodStatistics o) {
+      if(o.getThresh() > thresh)
+        return 1;
+      else if (o.getThresh() < thresh)
+        return -1;
+      return 0;
+    }
   }
 }
