@@ -71,6 +71,13 @@
 			<systemPath>${basedir}/src/main/resources/lib/Fractional_Splines_Wavelets.jar</systemPath>
 		</dependency>
 		<dependency>
+			<groupId>AnalyzeSkeleton</groupId>
+			<artifactId>AnalyzeSkeleton</artifactId>
+			<version>2.0.0</version>
+			<scope>system</scope>
+			<systemPath>${basedir}/src/main/resources/lib/AnalyzeSkeleton_-2.0.0-SNAPSHOT.jar</systemPath>
+		</dependency>
+		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
 			<version>4.11</version>

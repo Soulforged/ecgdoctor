@@ -61,11 +61,70 @@ public class ImageJTest implements PlugInFilter {
       ImageProcessor ip = new ColorProcessor(bi);
       doRun(ip, "target/ecg-byn-out.png");
 
-      ecgImage = this.getClass().getResource("/image/ecg-pink.jpg");
+      ecgImage = this.getClass().getResource("/image/ecg-pink-1.jpg");
       Assert.assertNotNull(ecgImage);
       bi = ImageIO.read(ecgImage);
       ip = new ColorProcessor(bi);
-      doRun(ip, "target/ecg-pink-out.png");
+      doRun(ip, "target/ecg-pink-1-out.png");
+
+      ecgImage = this.getClass().getResource("/image/ecg-pink-2.gif");
+      Assert.assertNotNull(ecgImage);
+      bi = ImageIO.read(ecgImage);
+      ip = new ColorProcessor(bi);
+      doRun(ip, "target/ecg-pink-2-out.png");
+
+      ecgImage = this.getClass().getResource("/image/ecg-pink-3.jpg");
+      Assert.assertNotNull(ecgImage);
+      bi = ImageIO.read(ecgImage);
+      ip = new ColorProcessor(bi);
+      doRun(ip, "target/ecg-pink-3-out.png");
+
+      ecgImage = this.getClass().getResource("/image/ecg-pink-4.png");
+      Assert.assertNotNull(ecgImage);
+      bi = ImageIO.read(ecgImage);
+      ip = new ColorProcessor(bi);
+      doRun(ip, "target/ecg-pink-4-out.png");
+
+      ecgImage = this.getClass().getResource("/image/ecg-pink-5.jpg");
+      Assert.assertNotNull(ecgImage);
+      bi = ImageIO.read(ecgImage);
+      ip = new ColorProcessor(bi);
+      doRun(ip, "target/ecg-pink-5-out.png");
+
+      ecgImage = this.getClass().getResource(
+          "/image/ecg-pink-2-year-old-boy.jpg");
+      Assert.assertNotNull(ecgImage);
+      bi = ImageIO.read(ecgImage);
+      ip = new ColorProcessor(bi);
+      doRun(ip, "target/ecg-pink-2-year-old-boy-out.png");
+
+      ecgImage = this.getClass().getResource(
+          "/image/ecg-transparent-background-1.gif");
+      Assert.assertNotNull(ecgImage);
+      bi = ImageIO.read(ecgImage);
+      ip = new ColorProcessor(bi);
+      doRun(ip, "target/ecg-transparent-background-1-out.png");
+
+      ecgImage = this.getClass().getResource(
+          "/image/ecg-white-background-1.jpg");
+      Assert.assertNotNull(ecgImage);
+      bi = ImageIO.read(ecgImage);
+      ip = new ColorProcessor(bi);
+      doRun(ip, "target/ecg-white-background-1-out.png");
+
+      ecgImage = this.getClass().getResource(
+          "/image/ecg-white-background-2.png");
+      Assert.assertNotNull(ecgImage);
+      bi = ImageIO.read(ecgImage);
+      ip = new ColorProcessor(bi);
+      doRun(ip, "target/ecg-white-background-2-out.png");
+
+      ecgImage = this.getClass().getResource("/image/ecg-blue-background.jpg");
+      Assert.assertNotNull(ecgImage);
+      bi = ImageIO.read(ecgImage);
+      ip = new ColorProcessor(bi);
+      doRun(ip, "target/ecg-blue-background-out.png");
+
     } catch (final IOException e) {
       Assert.fail(e.getLocalizedMessage());
       e.printStackTrace();
@@ -73,59 +132,68 @@ public class ImageJTest implements PlugInFilter {
   }
 
   @Test
-  public void filtering(){
+  public void filtering() {
     final String[] imagePathsToProcess = new String[] { "ecg-byn", "ecg-pink" };
     try {
       final Map<Integer, String> iToName = new HashMap<Integer, String>();
-      iToName.put(0, "blur");iToName.put(1, "edges");
-      iToName.put(2, "median");iToName.put(3, "min");
-      iToName.put(4, "max");iToName.put(5, "convolve");
-      for(final String imagePath : imagePathsToProcess){
+      iToName.put(0, "blur");
+      iToName.put(1, "edges");
+      iToName.put(2, "median");
+      iToName.put(3, "min");
+      iToName.put(4, "max");
+      iToName.put(5, "convolve");
+      for (final String imagePath : imagePathsToProcess) {
         final URL ecgImage = this.getClass().getResource(
             "/image/" + imagePath + ".jpg");
         final BufferedImage bi = ImageIO.read(ecgImage);
         final ImageProcessor ip = new ColorProcessor(bi);
-        for(int i = 0; i < 6; i++){
+        for (int i = 0; i < 6; i++) {
           final BinaryProcessor bp = new BinaryProcessor(
               (ByteProcessor) ip.convertToByte(false));
           bp.filter(i);
           ImageIO.write(bp.getBufferedImage(), "png", new File("target/"
-              + imagePath + "-" + iToName.get(i) +".png"));
+              + imagePath + "-" + iToName.get(i) + ".png"));
         }
       }
-    }catch (final Exception e) {
+    } catch (final Exception e) {
       e.printStackTrace();
       Assert.fail(e.getMessage());
     }
   }
 
   @Test
-  public void thresholding(){
+  public void thresholding() {
     final String[] imagePathsToProcess = new String[] { "ecg-byn", "ecg-pink" };
     try {
       final List<ThresholdMethodStatistics> methodStats = new ArrayList<ThresholdMethodStatistics>();
-      for(final String imagePath : imagePathsToProcess){
+      for (final String imagePath : imagePathsToProcess) {
         final URL ecgImage = this.getClass().getResource(
             "/image/" + imagePath + ".jpg");
         final BufferedImage bi = ImageIO.read(ecgImage);
         final ImageProcessor ip = new ColorProcessor(bi);
-        for(final Method threshMethod : AutoThresholder.Method.values()){
+        for (final Method threshMethod : AutoThresholder.Method.values()) {
           final BinaryProcessor bp = new BinaryProcessor(
               (ByteProcessor) ip.convertToByte(false));
-          final int thresh = new AutoThresholder().getThreshold(threshMethod, bp.getHistogram());
-          methodStats.add(new ThresholdMethodStatistics(thresh, threshMethod.name()));
-          System.out.println(String.format("%s thresh: %s", threshMethod, thresh));
+          final int thresh = new AutoThresholder().getThreshold(threshMethod,
+              bp.getHistogram());
+          methodStats.add(new ThresholdMethodStatistics(thresh, threshMethod
+              .name()));
+          System.out.println(String.format("%s thresh: %s", threshMethod,
+              thresh));
           bp.threshold(thresh);
-          System.out.println(String.format("%s histogram: %s", threshMethod, Arrays.toString(bp.getHistogram())));
+          System.out.println(String.format("%s histogram: %s", threshMethod,
+              Arrays.toString(bp.getHistogram())));
           ImageIO.write(bp.getBufferedImage(), "png", new File("target/"
-              + imagePath + "-autothresh-" + threshMethod.toString().toLowerCase() +".png"));
+              + imagePath + "-autothresh-"
+              + threshMethod.toString().toLowerCase() + ".png"));
         }
         Collections.sort(methodStats);
         System.out.println("THRESHOLD STATISTICS");
-        for(final ThresholdMethodStatistics tms : methodStats)
+        for (final ThresholdMethodStatistics tms : methodStats) {
           System.out.println(tms);
+        }
       }
-    }catch(final Exception e){
+    } catch (final Exception e) {
       e.printStackTrace();
       Assert.fail(e.getMessage());
     }
@@ -251,13 +319,19 @@ public class ImageJTest implements PlugInFilter {
       printStatistics(proc);
       System.out.println("Before : " + Arrays.toString(proc.getHistogram()));
       final AutoThresholder thresholder = new AutoThresholder();
-      int threshold = thresholder.getThreshold(ipp.thresholdMethod(proc.getStatistics()), proc.getHistogram());
+      int threshold = thresholder.getThreshold(
+          ipp.thresholdMethod(proc.getStatistics()), proc.getHistogram());
       proc.threshold(threshold);
-      for(int i = 0; i < 5; i++)
+      for (int i = 0; i < 5; i++) {
         proc.filter(ImageProcessor.BLUR_MORE);
-      threshold = thresholder.getThreshold(ipp.thresholdMethod(proc.getStatistics()), proc.getHistogram());
+      }
+      threshold = thresholder.getThreshold(
+          ipp.thresholdMethod(proc.getStatistics()), proc.getHistogram());
       proc.threshold(threshold);
       proc.skeletonize();
+      // final AnalyzeSkeleton_ analyzeSkeleton = new AnalyzeSkeleton_();
+      // analyzeSkeleton.run(0, false, false, new ImagePlus("", ip), false,
+      // false);
       System.out.println("After : " + Arrays.toString(proc.getHistogram()));
       ImageIO.write(ip.getBufferedImage(), "png", new File(outFile.getPath()
           .replaceAll(".png", "-pure.png")));
@@ -267,20 +341,20 @@ public class ImageJTest implements PlugInFilter {
     }
   }
 
-  private void printStatistics(final ImageProcessor ip){
+  private void printStatistics(final ImageProcessor ip) {
     System.out.println(String.format("Histogram: %s, %s, %s",
-        ip.getHistogramSize(), ip.getHistogramMax(),
-        ip.getHistogramMin()));
+        ip.getHistogramSize(), ip.getHistogramMax(), ip.getHistogramMin()));
     final ImageStatistics ips = ip.getStatistics();
     final Field[] stats = ImageStatistics.class.getDeclaredFields();
-    for(final Field f : stats)
+    for (final Field f : stats) {
       try {
         f.setAccessible(true);
-        System.out.println(String.format("%s: %s",f.getName() ,f.get(ips)));
+        System.out.println(String.format("%s: %s", f.getName(), f.get(ips)));
         f.setAccessible(false);
       } catch (final Exception e) {
         e.printStackTrace();
       }
+    }
   }
 
   /*
@@ -294,9 +368,11 @@ public class ImageJTest implements PlugInFilter {
     return NO_CHANGES;
   }
 
-  class ThresholdMethodStatistics implements Comparable<ThresholdMethodStatistics>{
+  class ThresholdMethodStatistics implements
+      Comparable<ThresholdMethodStatistics> {
     private final int thresh;
     private final String name;
+
     public ThresholdMethodStatistics(final int thresh, final String name) {
       super();
       this.thresh = thresh;
@@ -319,10 +395,11 @@ public class ImageJTest implements PlugInFilter {
 
     @Override
     public int compareTo(final ThresholdMethodStatistics o) {
-      if(o.getThresh() > thresh)
+      if (o.getThresh() > thresh) {
         return 1;
-      else if (o.getThresh() < thresh)
+      } else if (o.getThresh() < thresh) {
         return -1;
+      }
       return 0;
     }
   }
