@@ -19,7 +19,6 @@ import org.apache.commons.collections.Predicate;
 
 import edu.uk.dromm.img.ECGPoint;
 import edu.uk.dromm.img.ImageProcess;
-import fractsplinewavelets.FractSplineWavelets;
 
 /**
  * @author magian
@@ -67,7 +66,7 @@ public class ECGImageAnalisys implements ImageProcess {
     // TODO Encontrar picos y guardar sus coordenadas
     drawTableXY(points);
 
-    final FractSplineWavelets fractSplineWavelets = new FractSplineWavelets();
+    analizePointsXY(points, ip);
 
     return ip.getBufferedImage();
   }
@@ -128,6 +127,24 @@ public class ECGImageAnalisys implements ImageProcess {
       final Point pt = (Point)p;
       return x1 <= pt.x && pt.x <= x2;
     }
+  }
+
+  /**
+   * @param ip
+   */
+  private void analizePointsXY(final List<Point> points, final ImageProcessor ip) {
+    // for (final Point point : points) {
+    // for (int x = 0; x < 1; x++) {
+    // for (int y = 0; y < po; y++) {
+    // final int point = ip.getPixel(x, y);
+    // if (point != 0) {
+    // System.out.println("primer punto: x = " + x + "; y = " + y
+    // + "; valor: " + point);
+    // }
+    // }
+    // }
+    // }
+    // }
   }
 
   /**
