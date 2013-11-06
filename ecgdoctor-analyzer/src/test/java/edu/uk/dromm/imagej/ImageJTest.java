@@ -3,7 +3,6 @@
  */
 package edu.uk.dromm.imagej;
 
-import ij.IJ;
 import ij.ImagePlus;
 import ij.plugin.filter.PlugInFilter;
 import ij.plugin.filter.Skeletonize3D;
@@ -360,7 +359,6 @@ public class ImageJTest implements PlugInFilter {
       System.out.println("list end of points: 0.0");
       // final ImageStack imageStack = analyzeSkeleton.getResultImage(true);
       analyzeSkeleton.calculateShortestPath = true;
-      IJ.run(imagePlus, "Skeletonize (2D/3D)", "");
       analyzeSkeleton.setup("", imagePlus);
       // analyzeSkeleton.verbose = true;
       // analyzeSkeleton.pruneEnds = true;
