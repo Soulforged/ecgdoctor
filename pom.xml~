@@ -3,7 +3,7 @@
 	<modelVersion>4.0.0</modelVersion>
 
 	<groupId>edu.uk.dromm</groupId>
-	<artifactId>ecgdoctor</artifactId>
+	<artifactId>ecg-analyzer</artifactId>
 	<version>1.0-SNAPSHOT</version>
 	<packaging>pom</packaging>
 
@@ -39,4 +39,10 @@
 			<scope>test</scope>
 		</dependency>
 	</dependencies>
+	<repositories>
+		<repository>
+			<id>imageJ2</id>
+			<url>http://maven.imagej.net:8081/content/repositories/releases</url>
+		</repository>
+	</repositories>
 </project>
