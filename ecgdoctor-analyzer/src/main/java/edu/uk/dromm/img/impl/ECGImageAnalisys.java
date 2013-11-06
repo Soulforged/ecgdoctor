@@ -125,7 +125,7 @@ public class ECGImageAnalisys implements ImageProcess {
     @Override
     public boolean evaluate(final Object p) {
       final Point pt = (Point)p;
-      return x1 <= pt.x && pt.x <= x2;
+      return y <= pt.x && pt.x <= y;
     }
   }
 

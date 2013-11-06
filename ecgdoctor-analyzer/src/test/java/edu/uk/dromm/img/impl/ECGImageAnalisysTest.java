@@ -63,13 +63,13 @@ public class ECGImageAnalisysTest {
     final Point lastPoint = ps.get(ps.size() - 1);
     final int lastPointOnX = Double.valueOf(lastPoint.x * 0.01).intValue();
     CollectionUtils.filter(ps, new PointsBeetweenX(0, lastPointOnX));
-    ana.zeroes(zeroes, ps, 0, lastPoint.y, lastPointOnX);
+    //    ana.zeroes(zeroes, ps, 0, lastPoint.y, lastPointOnX);
     System.out.println(Arrays.toString(zeroes.toArray()));
   }
 
-  private boolean isZero(final Point p, final ImageProcessor ip){
-
-  }
+  //  private boolean isZero(final Point p, final ImageProcessor ip){
+  //
+  //  }
 
   class PointsBeetweenX implements Predicate{
 
