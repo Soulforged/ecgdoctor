@@ -310,10 +310,15 @@ public class ImageJTest implements PlugInFilter {
     // doRun(ip, "Dani.png");
   }
 
-  private final float[] kernel = new float[]{
-      1, 0, 1,
-      0, 1, 0,
-      1, 1, 1
+  private final float[] kernelFloat = new float[]{
+      1, 2, 1,
+      1, 2, 1,
+      1, 2, 1
+  };
+  private final int[] kernel = new int[]{
+      1, 2, 1,
+      1, 2, 1,
+      1, 2, 1
   };
 
   private void doRun(final ImageProcessor ip, final String stringOut) {
