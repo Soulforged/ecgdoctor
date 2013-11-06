@@ -13,7 +13,11 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.TreeMap;
 
 import javax.imageio.ImageIO;
 
@@ -63,13 +67,23 @@ public class ECGImageAnalisysTest {
     final Point lastPoint = ps.get(ps.size() - 1);
     final int lastPointOnX = Double.valueOf(lastPoint.x * 0.01).intValue();
     CollectionUtils.filter(ps, new PointsBeetweenX(0, lastPointOnX));
-    ana.zeroes(zeroes, ps, 0, lastPoint.y, lastPointOnX);
+    Assert.assertFalse(ps.isEmpty());
+    for(final Point p : ps)
+      if(p.x > lastPointOnX)
+        Assert.fail("There shouldn't be any points past " + lastPointOnX);
+    final Map<Integer, Set<Point>> pointsOnLine = new TreeMap<Integer, Set<Point>>(new Comparator<Integer>() {
+      @Override
+      public int compare(final Integer o1, final Integer o2) {
+        return o1.compareTo(o2);
+      }
+    });
+    //    ana.zeroes(zeroes, ps, 0, lastPoint.y, lastPointOnX);
     System.out.println(Arrays.toString(zeroes.toArray()));
   }
 
-  private boolean isZero(final Point p, final ImageProcessor ip){
-
-  }
+  //  private boolean isZero(final Point p, final ImageProcessor ip){
+  //
+  //  }
 
   class PointsBeetweenX implements Predicate{
 
@@ -85,6 +99,32 @@ public class ECGImageAnalisysTest {
     public boolean evaluate(final Object p) {
       final Point point = (Point) p;
       return x1 <= point.x && point.x <= x2;
+    }
+  }
+
+  class MinimumX implements Predicate{
+
+
+    @Override
+    public boolean evaluate(final Object arg0) {
+      // TODO Auto-generated method stub
+      return false;
+    }
+  }
+
+  class XOnLine implements Predicate{
+
+    private final int y;
+
+    public XOnLine(final int y) {
+      super();
+      this.y = y;
+    }
+
+    @Override
+    public boolean evaluate(final Object p) {
+      final Point point = (Point)p;
+      return point.y == y;
     }
   }
 }
