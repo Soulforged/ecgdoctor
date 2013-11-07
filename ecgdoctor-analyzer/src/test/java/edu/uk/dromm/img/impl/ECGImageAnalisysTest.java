@@ -27,7 +27,7 @@ import edu.uk.dromm.img.ImageProcess;
 public class ECGImageAnalisysTest {
 
   @Test
-  public void obtainZeroes(){
+  public void process(){
     final URL ecgImage = this.getClass().getResource("/image/ecg-byn.jpg");
     Assert.assertNotNull(ecgImage);
     BufferedImage bi = null;
@@ -40,14 +40,16 @@ public class ECGImageAnalisysTest {
     final BufferedImage resultantBi = pre.process(bi);
     final ImageProcessor ip = new BinaryProcessor(
         new ByteProcessor(resultantBi));
-    obtainingZeroes(ip);
+    final ECGImageAnalisys ana = new ECGImageAnalisys(0);
+    obtainingZeroes(ana, ip);
+    ana.process(resultantBi);
   }
 
-  private void obtainingZeroes(final ImageProcessor ip) {
-    final ECGImageAnalisys ana = new ECGImageAnalisys(0);
-    final List<Point> zeroes = ana.zeroes(ip);
+  private void obtainingZeroes(final ECGImageAnalisys ecgim, final ImageProcessor ip) {
+    final List<Point> zeroes = ecgim.zeroes(ip);
     Assert.assertFalse(zeroes.isEmpty());
     Assert.assertEquals(3, zeroes.size());
+    System.out.println(zeroes);
   }
 
 }

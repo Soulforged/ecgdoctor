@@ -51,12 +51,67 @@ public class ECGImageAnalisys implements ImageProcess {
   public BufferedImage process(final BufferedImage bi) {
     final ImageProcessor ip = new BinaryProcessor(new ByteProcessor(bi));
     final List<Point> zeroes = zeroes(ip);
+    final List<Point> firstThreeZeroes = zeroes.subList(0, 2);
     final double gridCellProportionY = 0.037593985;
     final double gridCellProportionX = 0.0208333333;
     final double cellHeightInPx = ip.getHeight() * gridCellProportionY;
     final double cellWidthInPx = ip.getWidth() * gridCellProportionX;
-    final double maxY = cellHeightInPx * 3;
+    final double leadDistance = cellWidthInPx * 12.5;
+    final int maxY = new Double(cellHeightInPx * 3).intValue();
+    final int firstLeadMark = new Double(leadDistance).intValue();
+    final int secondLeadMark = firstLeadMark * 2;
+    final int thirdLeadMark = firstLeadMark * 3;
+    final int fourthLeadMark = Math.max(firstLeadMark * 4, ip.getWidth());
+    final int firstStripeUpper = zeroes.get(0).y + maxY;
+    final int firstStripeLower = zeroes.get(0).y - maxY;
+    final int secondStripeUpper = zeroes.get(1).y + maxY;
+    final int secondStripeLower = zeroes.get(1).y - maxY;
+    final int thirdStripeUpper = zeroes.get(2).y + maxY;
+    final int thirdStripeLower = zeroes.get(2).y - maxY;
+    final List<Point> allPoints = allPoints(ip);
+    final List<Point> leadIPoints = new ArrayList<Point>(allPoints);
+    CollectionUtils.filter(leadIPoints, new PointsInDistance(firstStripeLower, firstStripeUpper, 0, firstLeadMark));
+    final List<Point> leadAVRPoints = new ArrayList<Point>(allPoints);
+    CollectionUtils.filter(leadAVRPoints, new PointsInDistance(firstStripeLower, firstStripeUpper, firstLeadMark, secondLeadMark));
+    final List<Point> leadV1Points = new ArrayList<Point>(allPoints);
+    CollectionUtils.filter(leadV1Points, new PointsInDistance(firstStripeLower, firstStripeUpper, secondLeadMark, thirdLeadMark));
+    final List<Point> leadV4Points = new ArrayList<Point>(allPoints);
+    CollectionUtils.filter(leadV4Points, new PointsInDistance(firstStripeLower, firstStripeUpper, thirdLeadMark, fourthLeadMark));
+    final List<Point> leadIIPoints = new ArrayList<Point>(allPoints);
+    CollectionUtils.filter(leadIIPoints, new PointsInDistance(secondStripeLower, secondStripeUpper, 0, firstLeadMark));
+    final List<Point> leadAVLPoints = new ArrayList<Point>(allPoints);
+    CollectionUtils.filter(leadAVLPoints, new PointsInDistance(secondStripeLower, secondStripeUpper, firstLeadMark, secondLeadMark));
+    final List<Point> leadV2Points = new ArrayList<Point>(allPoints);
+    CollectionUtils.filter(leadV2Points, new PointsInDistance(secondStripeLower, secondStripeUpper, secondLeadMark, thirdLeadMark));
+    final List<Point> leadV5Points = new ArrayList<Point>(allPoints);
+    CollectionUtils.filter(leadV5Points, new PointsInDistance(secondStripeLower, secondStripeUpper, thirdLeadMark, fourthLeadMark));
+    final List<Point> leadIIIPoints = new ArrayList<Point>(allPoints);
+    CollectionUtils.filter(leadIIIPoints, new PointsInDistance(thirdStripeLower, thirdStripeUpper, 0, firstLeadMark));
+    final List<Point> leadAVFPoints = new ArrayList<Point>(allPoints);
+    CollectionUtils.filter(leadAVFPoints, new PointsInDistance(thirdStripeLower, thirdStripeUpper, firstLeadMark, secondLeadMark));
+    final List<Point> leadV3Points = new ArrayList<Point>(allPoints);
+    CollectionUtils.filter(leadV3Points, new PointsInDistance(thirdStripeLower, thirdStripeUpper, secondLeadMark, thirdLeadMark));
+    final List<Point> leadV6Points = new ArrayList<Point>(allPoints);
+    CollectionUtils.filter(leadV6Points, new PointsInDistance(thirdStripeLower, thirdStripeUpper, thirdLeadMark, fourthLeadMark));
+    print("LEAD I", leadIPoints);
+    print("LEAD AVR", leadAVRPoints);
+    print("LEAD V1", leadV1Points);
+    print("LEAD V4", leadV4Points);
+    print("LEAD II", leadIIPoints);
+    print("LEAD AVL", leadAVLPoints);
+    print("LEAD V2", leadV2Points);
+    print("LEAD V5", leadV5Points);
+    print("LEAD III", leadIIIPoints);
+    print("LEAD AVF", leadAVFPoints);
+    print("LEAD V3", leadV3Points);
+    print("LEAD V6", leadV6Points);
     return ip.getBufferedImage();
+  }
+
+  private void print(final String title, final List<Point> points){
+    System.out.println(String.format(" =========== %s =========== ", title));
+    for(final Point p : points)
+      System.out.println(p);
   }
 
   public List<Point> zeroes(final ImageProcessor ip){
@@ -89,6 +144,7 @@ public class ECGImageAnalisys implements ImageProcess {
     for(final Integer y : pointsPerY.keySet())
       firstPointPerY.put(y, pointsPerY.get(y).iterator().next());
     final Set<Integer> averages = averageToMinimum(firstPointPerY.keySet());
+    System.out.println(averages);
     final List<Point> zeroes = new ArrayList<Point>();
     for(final Integer y : averages)
       zeroes.add(firstPointPerY.get(y));
@@ -140,7 +196,7 @@ public class ECGImageAnalisys implements ImageProcess {
   class IntegerComparator implements Comparator<Integer>{
     @Override
     public int compare(final Integer o1, final Integer o2) {
-      return o2.compareTo(o1);
+      return o2.compareTo(o1) * -1;
     }
   }
 
@@ -254,19 +310,21 @@ public class ECGImageAnalisys implements ImageProcess {
 
   class PointsInDistance implements Predicate{
 
-    private final double distance;
-    private final Point ref;
+    private final int x1, x2;
+    private final int y1, y2;
 
-    public PointsInDistance(final double distance, final Point ref) {
+    public PointsInDistance(final int y1, final int y2, final int x1, final int x2) {
       super();
-      this.distance = distance;
-      this.ref = ref;
+      this.x1 = x1;
+      this.x2 = x2;
+      this.y1 = y1;
+      this.y2 = y2;
     }
 
     @Override
     public boolean evaluate(final Object p) {
       final Point point = (Point)p;
-      return ref.distance(point) <= distance;
+      return y1 <= point.y && point.y <= y2 && x1 <= point.x && point.x <= x2;
     }
   }
 }
