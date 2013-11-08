@@ -22,6 +22,7 @@ import java.util.TreeSet;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.Predicate;
+import org.apache.commons.collections.Transformer;
 
 import edu.uk.dromm.img.ECGPoint;
 import edu.uk.dromm.img.ImageProcess;
@@ -69,49 +70,91 @@ public class ECGImageAnalisys implements ImageProcess {
     final int thirdStripeUpper = zeroes.get(2).y + maxY;
     final int thirdStripeLower = zeroes.get(2).y - maxY;
     final List<Point> allPoints = allPoints(ip);
-    final List<Point> leadIPoints = new ArrayList<Point>(allPoints);
+    List<Point> leadIPoints = new ArrayList<Point>(allPoints);
     CollectionUtils.filter(leadIPoints, new PointsInDistance(firstStripeLower, firstStripeUpper, 0, firstLeadMark));
-    final List<Point> leadAVRPoints = new ArrayList<Point>(allPoints);
+    CollectionUtils.transform(leadIPoints, new Level(zeroes.get(0)));
+    leadIPoints = fillGaps(leadIPoints);
+    List<Point> leadAVRPoints = new ArrayList<Point>(allPoints);
     CollectionUtils.filter(leadAVRPoints, new PointsInDistance(firstStripeLower, firstStripeUpper, firstLeadMark, secondLeadMark));
-    final List<Point> leadV1Points = new ArrayList<Point>(allPoints);
+    CollectionUtils.transform(leadAVRPoints, new Level(zeroes.get(0)));
+    leadAVRPoints = fillGaps(leadAVRPoints);
+    List<Point> leadV1Points = new ArrayList<Point>(allPoints);
     CollectionUtils.filter(leadV1Points, new PointsInDistance(firstStripeLower, firstStripeUpper, secondLeadMark, thirdLeadMark));
-    final List<Point> leadV4Points = new ArrayList<Point>(allPoints);
+    CollectionUtils.transform(leadV1Points, new Level(zeroes.get(0)));
+    leadV1Points = fillGaps(leadV1Points);
+    List<Point> leadV4Points = new ArrayList<Point>(allPoints);
     CollectionUtils.filter(leadV4Points, new PointsInDistance(firstStripeLower, firstStripeUpper, thirdLeadMark, fourthLeadMark));
-    final List<Point> leadIIPoints = new ArrayList<Point>(allPoints);
+    CollectionUtils.transform(leadV4Points, new Level(zeroes.get(0)));
+    leadV4Points = fillGaps(leadV4Points);
+    List<Point> leadIIPoints = new ArrayList<Point>(allPoints);
     CollectionUtils.filter(leadIIPoints, new PointsInDistance(secondStripeLower, secondStripeUpper, 0, firstLeadMark));
-    final List<Point> leadAVLPoints = new ArrayList<Point>(allPoints);
+    CollectionUtils.transform(leadIIPoints, new Level(zeroes.get(1)));
+    leadIIPoints = fillGaps(leadIIPoints);
+    List<Point> leadAVLPoints = new ArrayList<Point>(allPoints);
     CollectionUtils.filter(leadAVLPoints, new PointsInDistance(secondStripeLower, secondStripeUpper, firstLeadMark, secondLeadMark));
-    final List<Point> leadV2Points = new ArrayList<Point>(allPoints);
+    CollectionUtils.transform(leadAVLPoints, new Level(zeroes.get(1)));
+    leadAVLPoints = fillGaps(leadAVLPoints);
+    List<Point> leadV2Points = new ArrayList<Point>(allPoints);
     CollectionUtils.filter(leadV2Points, new PointsInDistance(secondStripeLower, secondStripeUpper, secondLeadMark, thirdLeadMark));
-    final List<Point> leadV5Points = new ArrayList<Point>(allPoints);
+    CollectionUtils.transform(leadV2Points, new Level(zeroes.get(1)));
+    leadV2Points = fillGaps(leadV2Points);
+    List<Point> leadV5Points = new ArrayList<Point>(allPoints);
     CollectionUtils.filter(leadV5Points, new PointsInDistance(secondStripeLower, secondStripeUpper, thirdLeadMark, fourthLeadMark));
-    final List<Point> leadIIIPoints = new ArrayList<Point>(allPoints);
+    CollectionUtils.transform(leadV5Points, new Level(zeroes.get(1)));
+    leadV5Points = fillGaps(leadV5Points);
+    List<Point> leadIIIPoints = new ArrayList<Point>(allPoints);
     CollectionUtils.filter(leadIIIPoints, new PointsInDistance(thirdStripeLower, thirdStripeUpper, 0, firstLeadMark));
-    final List<Point> leadAVFPoints = new ArrayList<Point>(allPoints);
+    CollectionUtils.transform(leadIIIPoints, new Level(zeroes.get(2)));
+    leadIIIPoints = fillGaps(leadIIIPoints);
+    List<Point> leadAVFPoints = new ArrayList<Point>(allPoints);
     CollectionUtils.filter(leadAVFPoints, new PointsInDistance(thirdStripeLower, thirdStripeUpper, firstLeadMark, secondLeadMark));
-    final List<Point> leadV3Points = new ArrayList<Point>(allPoints);
+    CollectionUtils.transform(leadAVFPoints, new Level(zeroes.get(2)));
+    leadAVFPoints = fillGaps(leadAVFPoints);
+    List<Point> leadV3Points = new ArrayList<Point>(allPoints);
     CollectionUtils.filter(leadV3Points, new PointsInDistance(thirdStripeLower, thirdStripeUpper, secondLeadMark, thirdLeadMark));
-    final List<Point> leadV6Points = new ArrayList<Point>(allPoints);
+    CollectionUtils.transform(leadV3Points, new Level(zeroes.get(2)));
+    leadV3Points = fillGaps(leadV3Points);
+    List<Point> leadV6Points = new ArrayList<Point>(allPoints);
     CollectionUtils.filter(leadV6Points, new PointsInDistance(thirdStripeLower, thirdStripeUpper, thirdLeadMark, fourthLeadMark));
-    print("LEAD I", leadIPoints);
-    print("LEAD AVR", leadAVRPoints);
-    print("LEAD V1", leadV1Points);
-    print("LEAD V4", leadV4Points);
-    print("LEAD II", leadIIPoints);
-    print("LEAD AVL", leadAVLPoints);
-    print("LEAD V2", leadV2Points);
-    print("LEAD V5", leadV5Points);
-    print("LEAD III", leadIIIPoints);
-    print("LEAD AVF", leadAVFPoints);
-    print("LEAD V3", leadV3Points);
-    print("LEAD V6", leadV6Points);
+    CollectionUtils.transform(leadV6Points, new Level(zeroes.get(2)));
+    leadV6Points = fillGaps(leadV6Points);
     return ip.getBufferedImage();
   }
 
-  private void print(final String title, final List<Point> points){
-    System.out.println(String.format(" =========== %s =========== ", title));
-    for(final Point p : points)
-      System.out.println(p);
+  private List<Point> fillGaps(final List<Point> points){
+    final List<Point> withGapsFilled = new ArrayList<Point>(points.size());
+    for(int i = 0; i < points.size() - 1; i++){
+      final Point point = points.get(i);
+      final int diffX = points.get(i + 1).x - point.x;
+      if(diffX != 0){
+        final int diffY = points.get(i + 1).y - point.y;
+        fillGap(diffX, diffY, withGapsFilled, point);
+      } else
+        withGapsFilled.add(point);
+    }
+    return withGapsFilled;
+  }
+
+  private void fillGap(final int gapX, final int gapY, final List<Point> points, final Point currentPoint){
+    final float diff = gapY / gapX;
+    for(int i = 1; i < gapX + 1; i++)
+      points.add(new ECGPoint(currentPoint.x + i, new Float(currentPoint.y + diff).intValue()));
+  }
+
+  class Level implements Transformer{
+
+    private final Point zero;
+
+    public Level(final Point zero) {
+      super();
+      this.zero = zero;
+    }
+
+    @Override
+    public Point transform(final Object p) {
+      final Point point = (Point)p;
+      return new ECGPoint(point.x, (point.y - zero.y) * -1);
+    }
   }
 
   public List<Point> zeroes(final ImageProcessor ip){
