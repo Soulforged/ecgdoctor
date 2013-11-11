@@ -4,6 +4,8 @@
 package edu.uk.dromm.imagej;
 
 import ij.ImagePlus;
+import ij.plugin.filter.BackgroundSubtracter;
+import ij.plugin.filter.OwnFFTFilter;
 import ij.plugin.filter.PlugInFilter;
 import ij.plugin.filter.Skeletonize3D;
 import ij.process.AutoThresholder;
@@ -32,9 +34,6 @@ import javax.imageio.ImageIO;
 import org.junit.Assert;
 import org.junit.Test;
 
-import edu.uk.dromm.img.Factory;
-import edu.uk.dromm.img.ImageParameterProvider;
-
 /**
  * @author dicardo
  * 
@@ -59,24 +58,24 @@ public class ImageJTest implements PlugInFilter {
       BufferedImage bi;
       ImageProcessor ip;
 
-      ecgImage = this.getClass().getResource("/image/ecg-byn.jpg");
-      Assert.assertNotNull(ecgImage);
-      bi = ImageIO.read(ecgImage);
-      ip = new ColorProcessor(bi);
-      doRun(ip, "target/ecg-byn-out.png");
-
-      ecgImage = this.getClass().getResource("/image/ecg-pink-1.jpg");
-      Assert.assertNotNull(ecgImage);
-      bi = ImageIO.read(ecgImage);
-      ip = new ColorProcessor(bi);
-      doRun(ip, "target/ecg-pink-1-out.png");
-
-      //      ecgImage = this.getClass().getResource("/image/ecg-pink-2.gif");
+      //      ecgImage = this.getClass().getResource("/image/ecg-byn.jpg");
       //      Assert.assertNotNull(ecgImage);
       //      bi = ImageIO.read(ecgImage);
       //      ip = new ColorProcessor(bi);
-      //      doRun(ip, "target/ecg-pink-2-out.png");
-      //
+      //      doRun(ip, "target/ecg-byn-out.png");
+
+      ecgImage = this.getClass().getResource("/image/ecg-pink-M234Mo253Std23Sk-2Ku14.jpg");
+      Assert.assertNotNull(ecgImage);
+      bi = ImageIO.read(ecgImage);
+      ip = new ColorProcessor(bi);
+      doRun(ip, "target/ecg-pink-M234Mo253Std23Sk-2Ku14-out.png");
+
+      ecgImage = this.getClass().getResource("/image/ecg-pink-M227Mo255Std41Sk-3Ku13.gif");
+      Assert.assertNotNull(ecgImage);
+      bi = ImageIO.read(ecgImage);
+      ip = new ColorProcessor(bi);
+      doRun(ip, "target/ecg-pink-M227Mo255Std41Sk-3Ku13.png");
+
       //      ecgImage = this.getClass().getResource("/image/ecg-pink-3.jpg");
       //      Assert.assertNotNull(ecgImage);
       //      bi = ImageIO.read(ecgImage);
@@ -101,7 +100,7 @@ public class ImageJTest implements PlugInFilter {
       //      bi = ImageIO.read(ecgImage);
       //      ip = new ColorProcessor(bi);
       //      doRun(ip, "target/ecg-pink-2-year-old-boy-out.png");
-      //
+
       //      ecgImage = this.getClass().getResource(
       //          "/image/ecg-transparent-background-1.gif");
       //      Assert.assertNotNull(ecgImage);
@@ -310,40 +309,27 @@ public class ImageJTest implements PlugInFilter {
     // doRun(ip, "Dani.png");
   }
 
-  private final float[] kernelFloat = new float[]{
-      1, 2, 1,
-      1, 2, 1,
-      1, 2, 1
-  };
-  private final int[] kernel = new int[]{
-      1, 2, 1,
-      1, 2, 1,
-      1, 2, 1
-  };
-
   private void doRun(final ImageProcessor ip, final String stringOut) {
     final File outFile = new File(stringOut);
-    final Factory factory = new Factory();
-    final ImageParameterProvider ipp = factory.getImageParameterProvider();
     try {
-      System.out.println("BEFORE");
-      printStatistics(ip);
+      System.out.println("============= " + stringOut + " =============");
       final BinaryProcessor proc = new BinaryProcessor(
           (ByteProcessor) ip.convertToByte(false));
-      System.out.println("AFTER");
       printStatistics(proc);
-      System.out.println("Before : " + Arrays.toString(proc.getHistogram()));
-      final AutoThresholder thresholder = new AutoThresholder();
-      int threshold = thresholder.getThreshold(
-          ipp.thresholdMethod(proc.getStatistics()), proc.getHistogram());
-      proc.threshold(threshold);
-      for (int i = 0; i < 5; i++)
-        proc.filter(ImageProcessor.BLUR_MORE);
-      threshold = thresholder.getThreshold(
-          ipp.thresholdMethod(proc.getStatistics()), proc.getHistogram());
-      proc.threshold(threshold);
+      final ImagePlus imagePlus = new ImagePlus("", proc);
+
+      final OwnFFTFilter fft = new OwnFFTFilter();
+      fft.filter(proc, 5, 3, 2, 5);
+      fft.filter(proc, 5, 3, 1, 5);
+
+      final BackgroundSubtracter bs = new BackgroundSubtracter();
+      bs.setup("", imagePlus);
+      bs.rollingBallBackground(proc, 0.1d, false, true, true, false, false);
+
+      proc.autoThreshold();
+
       proc.skeletonize();
-      System.out.println("After : " + Arrays.toString(proc.getHistogram()));
+
       ImageIO.write(ip.getBufferedImage(), "png", new File(outFile.getPath()
           .replaceAll(".png", "-pure.png")));
       ImageIO.write(proc.getBufferedImage(), "png", outFile);

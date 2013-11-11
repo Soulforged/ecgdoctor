@@ -118,7 +118,14 @@ public class ECGImageAnalisys implements ImageProcess {
     CollectionUtils.filter(leadV6Points, new PointsInDistance(thirdStripeLower, thirdStripeUpper, thirdLeadMark, fourthLeadMark));
     CollectionUtils.transform(leadV6Points, new Level(zeroes.get(2)));
     leadV6Points = fillGaps(leadV6Points);
+    print("LEAD II", leadIIPoints);
     return ip.getBufferedImage();
+  }
+
+  private void print(final String title, final List<Point> points){
+    System.out.println(String.format(" ============= %s ============= ", title));
+    for(final Point p : points)
+      System.out.println(p);
   }
 
   private List<Point> fillGaps(final List<Point> points){
