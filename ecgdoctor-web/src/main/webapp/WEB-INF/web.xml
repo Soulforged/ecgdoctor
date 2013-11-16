@@ -3,5 +3,35 @@
  "http://java.sun.com/dtd/web-app_2_3.dtd" >
 
 <web-app>
-  <display-name>Archetype Created Web Application</display-name>
+	<display-name>Archetype Created Web Application</display-name>
+	<servlet>
+		<servlet-name>SubirArchivo</servlet-name>
+		<servlet-class>edu.uk.practice.SubirArchivo</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>SubirArchivo</servlet-name>
+		<url-pattern>/SubirArchivo</url-pattern>
+	</servlet-mapping>
+	<session-config>
+		<session-timeout>30</session-timeout>
+	</session-config>
+	<!-- <servlet> -->
+	<!-- <servlet-name>simpleServlet</servlet-name> -->
+	<!-- <servlet-class>src.main.resources.edu.SimpleHttpServlet</servlet-class> -->
+
+	<!-- <init-param> -->
+	<!-- <param-name>myParam</param-name> -->
+	<!-- <param-value>paramValue</param-value> -->
+	<!-- </init-param> -->
+	<!-- <context-param> -->
+	<!-- <param-name>myParamContext</param-name> -->
+	<!-- <param-value>the value</param-value> -->
+	<!-- </context-param> -->
+	<!-- </servlet> -->
+
+	<!-- <servlet-mapping> -->
+	<!-- <servlet-name>simpleServlet</servlet-name> -->
+	<!-- <url-pattern>*.html</url-pattern> -->
+	<!-- </servlet-mapping> -->
+
 </web-app>

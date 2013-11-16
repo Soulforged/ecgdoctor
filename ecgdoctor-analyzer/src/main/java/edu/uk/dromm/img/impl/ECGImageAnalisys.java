@@ -71,77 +71,143 @@ public class ECGImageAnalisys implements ImageProcess {
     final int thirdStripeLower = zeroes.get(2).y - maxY;
     final List<Point> allPoints = allPoints(ip);
     List<Point> leadIPoints = new ArrayList<Point>(allPoints);
-    CollectionUtils.filter(leadIPoints, new PointsInDistance(firstStripeLower, firstStripeUpper, 0, firstLeadMark));
+    CollectionUtils.filter(leadIPoints, new PointsInDistance(firstStripeLower,
+        firstStripeUpper, 0, firstLeadMark));
     CollectionUtils.transform(leadIPoints, new Level(zeroes.get(0)));
     leadIPoints = fillGaps(leadIPoints);
     List<Point> leadAVRPoints = new ArrayList<Point>(allPoints);
-    CollectionUtils.filter(leadAVRPoints, new PointsInDistance(firstStripeLower, firstStripeUpper, firstLeadMark, secondLeadMark));
+    CollectionUtils.filter(leadAVRPoints, new PointsInDistance(
+        firstStripeLower, firstStripeUpper, firstLeadMark, secondLeadMark));
     CollectionUtils.transform(leadAVRPoints, new Level(zeroes.get(0)));
     leadAVRPoints = fillGaps(leadAVRPoints);
     List<Point> leadV1Points = new ArrayList<Point>(allPoints);
-    CollectionUtils.filter(leadV1Points, new PointsInDistance(firstStripeLower, firstStripeUpper, secondLeadMark, thirdLeadMark));
+    CollectionUtils.filter(leadV1Points, new PointsInDistance(firstStripeLower,
+        firstStripeUpper, secondLeadMark, thirdLeadMark));
     CollectionUtils.transform(leadV1Points, new Level(zeroes.get(0)));
     leadV1Points = fillGaps(leadV1Points);
     List<Point> leadV4Points = new ArrayList<Point>(allPoints);
-    CollectionUtils.filter(leadV4Points, new PointsInDistance(firstStripeLower, firstStripeUpper, thirdLeadMark, fourthLeadMark));
+    CollectionUtils.filter(leadV4Points, new PointsInDistance(firstStripeLower,
+        firstStripeUpper, thirdLeadMark, fourthLeadMark));
     CollectionUtils.transform(leadV4Points, new Level(zeroes.get(0)));
     leadV4Points = fillGaps(leadV4Points);
     List<Point> leadIIPoints = new ArrayList<Point>(allPoints);
-    CollectionUtils.filter(leadIIPoints, new PointsInDistance(secondStripeLower, secondStripeUpper, 0, firstLeadMark));
+    CollectionUtils.filter(leadIIPoints, new PointsInDistance(
+        secondStripeLower, secondStripeUpper, 0, firstLeadMark));
     CollectionUtils.transform(leadIIPoints, new Level(zeroes.get(1)));
     leadIIPoints = fillGaps(leadIIPoints);
     List<Point> leadAVLPoints = new ArrayList<Point>(allPoints);
-    CollectionUtils.filter(leadAVLPoints, new PointsInDistance(secondStripeLower, secondStripeUpper, firstLeadMark, secondLeadMark));
+    CollectionUtils.filter(leadAVLPoints, new PointsInDistance(
+        secondStripeLower, secondStripeUpper, firstLeadMark, secondLeadMark));
     CollectionUtils.transform(leadAVLPoints, new Level(zeroes.get(1)));
     leadAVLPoints = fillGaps(leadAVLPoints);
     List<Point> leadV2Points = new ArrayList<Point>(allPoints);
-    CollectionUtils.filter(leadV2Points, new PointsInDistance(secondStripeLower, secondStripeUpper, secondLeadMark, thirdLeadMark));
+    CollectionUtils.filter(leadV2Points, new PointsInDistance(
+        secondStripeLower, secondStripeUpper, secondLeadMark, thirdLeadMark));
     CollectionUtils.transform(leadV2Points, new Level(zeroes.get(1)));
     leadV2Points = fillGaps(leadV2Points);
     List<Point> leadV5Points = new ArrayList<Point>(allPoints);
-    CollectionUtils.filter(leadV5Points, new PointsInDistance(secondStripeLower, secondStripeUpper, thirdLeadMark, fourthLeadMark));
+    CollectionUtils.filter(leadV5Points, new PointsInDistance(
+        secondStripeLower, secondStripeUpper, thirdLeadMark, fourthLeadMark));
     CollectionUtils.transform(leadV5Points, new Level(zeroes.get(1)));
     leadV5Points = fillGaps(leadV5Points);
     List<Point> leadIIIPoints = new ArrayList<Point>(allPoints);
-    CollectionUtils.filter(leadIIIPoints, new PointsInDistance(thirdStripeLower, thirdStripeUpper, 0, firstLeadMark));
+    CollectionUtils.filter(leadIIIPoints, new PointsInDistance(
+        thirdStripeLower, thirdStripeUpper, 0, firstLeadMark));
     CollectionUtils.transform(leadIIIPoints, new Level(zeroes.get(2)));
     leadIIIPoints = fillGaps(leadIIIPoints);
     List<Point> leadAVFPoints = new ArrayList<Point>(allPoints);
-    CollectionUtils.filter(leadAVFPoints, new PointsInDistance(thirdStripeLower, thirdStripeUpper, firstLeadMark, secondLeadMark));
+    CollectionUtils.filter(leadAVFPoints, new PointsInDistance(
+        thirdStripeLower, thirdStripeUpper, firstLeadMark, secondLeadMark));
     CollectionUtils.transform(leadAVFPoints, new Level(zeroes.get(2)));
     leadAVFPoints = fillGaps(leadAVFPoints);
     List<Point> leadV3Points = new ArrayList<Point>(allPoints);
-    CollectionUtils.filter(leadV3Points, new PointsInDistance(thirdStripeLower, thirdStripeUpper, secondLeadMark, thirdLeadMark));
+    CollectionUtils.filter(leadV3Points, new PointsInDistance(thirdStripeLower,
+        thirdStripeUpper, secondLeadMark, thirdLeadMark));
     CollectionUtils.transform(leadV3Points, new Level(zeroes.get(2)));
     leadV3Points = fillGaps(leadV3Points);
     List<Point> leadV6Points = new ArrayList<Point>(allPoints);
-    CollectionUtils.filter(leadV6Points, new PointsInDistance(thirdStripeLower, thirdStripeUpper, thirdLeadMark, fourthLeadMark));
+    CollectionUtils.filter(leadV6Points, new PointsInDistance(thirdStripeLower,
+        thirdStripeUpper, thirdLeadMark, fourthLeadMark));
     CollectionUtils.transform(leadV6Points, new Level(zeroes.get(2)));
     leadV6Points = fillGaps(leadV6Points);
+    extractAndDiagnose(leadIIPoints, ip);
     return ip.getBufferedImage();
   }
 
-  private List<Point> fillGaps(final List<Point> points){
+  private void extractAndDiagnose(final List<Point> points,
+      final ImageProcessor ip) {
+    final List<Point> max = new ArrayList<Point>(points);
+    CollectionUtils.filter(max, new Maximum(points));
+    print("MAXIMOS", max);
+
+  }
+
+  private void print(final String title, final List<Point> points) {
+    System.out.println(String.format(" ========= %s ========= ", title));
+    for (final Point p : points) {
+      System.out.println(p);
+    }
+  }
+
+  class Maximum implements Predicate {
+
+    private final List<Point> points;
+
+    /**
+     * @param points
+     */
+    public Maximum(final List<Point> points) {
+      super();
+      this.points = points;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see org.apache.commons.collections.Predicate#evaluate(java.lang.Object)
+     */
+    @Override
+    public boolean evaluate(final Object arg0) {
+      final Point current = (Point) arg0;
+      final int indexOf = points.indexOf(current);
+      Point prev = new Point(0, 0);
+      Point next = new Point(Integer.MAX_VALUE, Integer.MAX_VALUE);
+      if (indexOf > 0) {
+        prev = points.get(indexOf - 1);
+      }
+      if (indexOf < points.size() - 1) {
+        next = points.get(indexOf + 1);
+      }
+      return prev.y < current.y && next.y < current.y || prev.y == current.y
+          && next.y < current.y;
+    }
+  }
+
+  private List<Point> fillGaps(final List<Point> points) {
     final List<Point> withGapsFilled = new ArrayList<Point>(points.size());
-    for(int i = 0; i < points.size() - 1; i++){
+    for (int i = 0; i < points.size() - 1; i++) {
       final Point point = points.get(i);
       final int diffX = points.get(i + 1).x - point.x;
-      if(diffX != 0){
+      if (diffX != 0) {
         final int diffY = points.get(i + 1).y - point.y;
         fillGap(diffX, diffY, withGapsFilled, point);
-      } else
+      } else {
         withGapsFilled.add(point);
+      }
     }
     return withGapsFilled;
   }
 
-  private void fillGap(final int gapX, final int gapY, final List<Point> points, final Point currentPoint){
+  private void fillGap(final int gapX, final int gapY,
+      final List<Point> points, final Point currentPoint) {
     final float diff = gapY / gapX;
-    for(int i = 1; i < gapX + 1; i++)
-      points.add(new ECGPoint(currentPoint.x + i, new Float(currentPoint.y + diff).intValue()));
+    for (int i = 1; i < gapX + 1; i++) {
+      points.add(new ECGPoint(currentPoint.x + i, new Float(currentPoint.y
+          + diff).intValue()));
+    }
   }
 
-  class Level implements Transformer{
+  class Level implements Transformer {
 
     private final Point zero;
 
@@ -152,91 +218,106 @@ public class ECGImageAnalisys implements ImageProcess {
 
     @Override
     public Point transform(final Object p) {
-      final Point point = (Point)p;
+      final Point point = (Point) p;
       return new ECGPoint(point.x, (point.y - zero.y) * -1);
     }
   }
 
-  public List<Point> zeroes(final ImageProcessor ip){
+  public List<Point> zeroes(final ImageProcessor ip) {
     final ECGImageAnalisys ana = new ECGImageAnalisys(0);
     final List<Point> ps = ana.allPoints(ip);
     final Point lastPoint = ps.get(ps.size() - 1);
     final int lastPointOnX = Double.valueOf(lastPoint.x * 0.01).intValue();
     CollectionUtils.filter(ps, new PointsBeetweenX(0, lastPointOnX));
-    for (final Point p : ps)
-      if (p.x > lastPointOnX)
+    for (final Point p : ps) {
+      if (p.x > lastPointOnX) {
         Collections.sort(ps, new Comparator<Point>() {
           @Override
           public int compare(final Point o1, final Point o2) {
-            if(o1.equals(o2))
+            if (o1.equals(o2)) {
               return 0;
-            if(o1.x < o2.x)
+            }
+            if (o1.x < o2.x) {
               return -1;
-            else
+            } else {
               return 1;
+            }
           }
         });
-    final Map<Integer, Collection<Point>> pointsPerY = new TreeMap<Integer, Collection<Point>>(new IntegerComparator());
+      }
+    }
+    final Map<Integer, Collection<Point>> pointsPerY = new TreeMap<Integer, Collection<Point>>(
+        new IntegerComparator());
     final int nearNess = 1;
-    for(final Point p : ps){
+    for (final Point p : ps) {
       final Collection<Point> newPoints = new ArrayList<Point>(ps);
       CollectionUtils.filter(newPoints, new NearPoint(p, nearNess));
       pointsPerY.put(p.y, newPoints);
     }
     final Map<Integer, Point> firstPointPerY = new HashMap<Integer, Point>();
-    for(final Integer y : pointsPerY.keySet())
+    for (final Integer y : pointsPerY.keySet()) {
       firstPointPerY.put(y, pointsPerY.get(y).iterator().next());
+    }
     final Set<Integer> averages = averageToMinimum(firstPointPerY.keySet());
     System.out.println(averages);
     final List<Point> zeroes = new ArrayList<Point>();
-    for(final Integer y : averages)
+    for (final Integer y : averages) {
       zeroes.add(firstPointPerY.get(y));
+    }
     return zeroes;
   }
 
-  public List<Point> allPoints(final ImageProcessor ip){
+  public List<Point> allPoints(final ImageProcessor ip) {
     final List<Point> points = new ArrayList<Point>();
-    for (int w = 0; w < ip.getWidth(); w++)
+    for (int w = 0; w < ip.getWidth(); w++) {
       for (int h = 0; h < ip.getHeight(); h++) {
         final int p = ip.getPixel(w, h);
-        if (p == blackValue)
+        if (p == blackValue) {
           points.add(new ECGPoint(w, h));
+        }
       }
+    }
     return points;
   }
 
-  public void zeroes(final List<Point> zeroes, final List<Point> points, final int y, final int maxY){
+  public void zeroes(final List<Point> zeroes, final List<Point> points,
+      final int y, final int maxY) {
     final List<Point> pointsOnHorizontalLine = new ArrayList<Point>();
     pointsOnHorizontalLine.addAll(points);
-    final Point zero = (Point)CollectionUtils.find(pointsOnHorizontalLine, new PointsOnY(y, points));
-    if(zero != null)
+    final Point zero = (Point) CollectionUtils.find(pointsOnHorizontalLine,
+        new PointsOnY(y, points));
+    if (zero != null) {
       zeroes.add(zero);
-    if(y >= maxY)
+    }
+    if (y >= maxY) {
       return;
-    else
-      zeroes(zeroes, points, y+1, maxY);
+    } else {
+      zeroes(zeroes, points, y + 1, maxY);
+    }
   }
 
-  private Set<Integer> averageToMinimum(final Collection<Integer> ints){
+  private Set<Integer> averageToMinimum(final Collection<Integer> ints) {
     final Set<Integer> averages = new TreeSet<Integer>(new IntegerComparator());
-    for(final Integer key : ints){
+    for (final Integer key : ints) {
       final List<Integer> filtered = new ArrayList<Integer>(ints);
       CollectionUtils.filter(filtered, new KeysNear(key));
       averages.add(average(filtered));
     }
-    if(averages.size() == ints.size())
+    if (averages.size() == ints.size()) {
       return averages;
+    }
     return averageToMinimum(averages);
   }
 
-  private Integer average(final List<Integer> numbers){
+  private Integer average(final List<Integer> numbers) {
     int sum = 0;
-    for(final Integer n : numbers)
+    for (final Integer n : numbers) {
       sum += n;
+    }
     return sum / numbers.size();
   }
 
-  class IntegerComparator implements Comparator<Integer>{
+  class IntegerComparator implements Comparator<Integer> {
     @Override
     public int compare(final Integer o1, final Integer o2) {
       return o2.compareTo(o1) * -1;
@@ -262,7 +343,7 @@ public class ECGImageAnalisys implements ImageProcess {
     }
   }
 
-  class PointInRange implements Predicate{
+  class PointInRange implements Predicate {
 
     private final double y;
 
@@ -273,7 +354,7 @@ public class ECGImageAnalisys implements ImageProcess {
 
     @Override
     public boolean evaluate(final Object p) {
-      final Point pt = (Point)p;
+      final Point pt = (Point) p;
       return y <= pt.x && pt.x <= y;
     }
   }
@@ -311,7 +392,7 @@ public class ECGImageAnalisys implements ImageProcess {
     }
   }
 
-  class NearPoint implements Predicate{
+  class NearPoint implements Predicate {
 
     private final Point centralPoint;
     private final int nearNess;
@@ -324,18 +405,19 @@ public class ECGImageAnalisys implements ImageProcess {
 
     @Override
     public boolean evaluate(final Object p) {
-      final Point point = (Point)p;
-      if(point.equals(centralPoint))
+      final Point point = (Point) p;
+      if (point.equals(centralPoint)) {
         return true;
-      else if(point.x == centralPoint.x)
+      } else if (point.x == centralPoint.x) {
         return Math.abs(point.y - centralPoint.y) == nearNess;
-      else if(point.y == centralPoint.y)
+      } else if (point.y == centralPoint.y) {
         return Math.abs(point.x - centralPoint.x) == nearNess;
+      }
       return false;
     }
   }
 
-  class KeysNear implements Predicate{
+  class KeysNear implements Predicate {
 
     private final int key;
 
@@ -346,17 +428,18 @@ public class ECGImageAnalisys implements ImageProcess {
 
     @Override
     public boolean evaluate(final Object i) {
-      final Integer integer = (Integer)i;
+      final Integer integer = (Integer) i;
       return Math.abs(integer - key) <= 1;
     }
   }
 
-  class PointsInDistance implements Predicate{
+  class PointsInDistance implements Predicate {
 
     private final int x1, x2;
     private final int y1, y2;
 
-    public PointsInDistance(final int y1, final int y2, final int x1, final int x2) {
+    public PointsInDistance(final int y1, final int y2, final int x1,
+        final int x2) {
       super();
       this.x1 = x1;
       this.x2 = x2;
@@ -366,7 +449,7 @@ public class ECGImageAnalisys implements ImageProcess {
 
     @Override
     public boolean evaluate(final Object p) {
-      final Point point = (Point)p;
+      final Point point = (Point) p;
       return y1 <= point.y && point.y <= y2 && x1 <= point.x && point.x <= x2;
     }
   }
