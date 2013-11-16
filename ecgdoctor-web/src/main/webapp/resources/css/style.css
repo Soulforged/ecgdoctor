@@ -1,0 +1,84 @@
+h1 {
+	color: white;
+	font-family: sans-serif;
+	font-size: xx-large;
+	font-variant: small-caps;
+	font-weight: bold;
+	text-shadow: 1px 1px 1px #c2bac2;
+	filter: dropshadow(color =   #c2bac2, offx =   1, offy =   1);
+}
+
+body#background {
+	background: linear-gradient(90deg, #6d0019 0%, #8f0222 70%, #a90329 100%);
+}
+
+input {
+	border-radius: 10px;
+	-moz-border-radius: 10px;
+	-ms-border-radius: 10px;
+	-o-border-radius: 10px;
+	-webkit-border-radius: 10px;
+	border: 1px solid #ccc;
+	font-size: 14pt;
+	padding: 5px 10px;
+}
+
+.button_file {
+	display: block;
+	color: white;
+	font-weight: bold;
+	height: 30px;
+	line-height: 29px;
+	margin-bottom: 14px;
+	text-decoration: none;
+	width: 350px;
+}
+
+.button_file:hover {
+	color: #a5656a;
+	border-color: #a5656a;
+	-webkit-background-size: 100% 200%;
+	-moz-background-size: 100% 200%;
+	background-size: 100% 200%;
+}
+
+.button_submit {
+	border-color: #999;
+	background: -webkit-linear-gradient(top, white, #E0E0E0);
+	background: -moz-linear-gradient(top, white, #E0E0E0);
+	background: -ms-linear-gradient(top, white, #E0E0E0);
+	background: -o-linear-gradient(top, white, #E0E0E0);
+	-webkit-box-shadow: 0 1px 2px rgba(0, 0, 0, 0.25), inset 0 0 3px #fff;
+	-moz-box-shadow: 0 1px 2px rgba(0, 0, 0, 0.25), inset 0 0 3px #fff;
+	box-shadow: 0 1px 2px rgba(0, 0, 0, 0.25), inset 0 0 3px #fff;
+}
+
+.button_submit:hover {
+	color: #a5656a;
+	border-color: #a5656a;
+	-webkit-background-size: 100% 200%;
+	-moz-background-size: 100% 200%;
+	background-size: 100% 200%;
+}
+
+progress {
+	width: 400px;
+	height: 30px;
+	margin: 50px auto;
+	display: block;
+	border: none;
+	visibility: hidden;
+}
+
+.progressBar {
+	width: 400px;
+	height: 14px;
+	visibility: hidden;
+	display: block;
+	margin: 50px auto;
+}
+
+.box {
+	-webkit-border-radius: 23334px;
+border-radius: 23334px;
+}
