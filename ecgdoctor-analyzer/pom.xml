@@ -5,8 +5,8 @@
 	<parent>
 		<groupId>edu.uk.dromm</groupId>
 		<artifactId>ecgdoctor</artifactId>
-    <version>1.0-SNAPSHOT</version>
-    <relativePath>../</relativePath>
+		<version>1.0-SNAPSHOT</version>
+		<relativePath>../</relativePath>
 	</parent>
 	<artifactId>ecg-analyzer</artifactId>
 	<packaging>jar</packaging>
@@ -40,20 +40,6 @@
 			<version>10.5.0</version>
 			<scope>system</scope>
 			<systemPath>${basedir}/src/main/resources/lib/wfdb.jar</systemPath>
-		</dependency>
-		<dependency>
-			<groupId>fractsoplinewavelets</groupId>
-			<artifactId>fractsoplinewavelets</artifactId>
-			<version>1.0.0</version>
-			<scope>system</scope>
-			<systemPath>${basedir}/src/main/resources/lib/Fractional_Splines_Wavelets.jar</systemPath>
-		</dependency>
-		<dependency>
-			<groupId>AnalyzeSkeleton</groupId>
-			<artifactId>AnalyzeSkeleton</artifactId>
-			<version>2.0.0</version>
-			<scope>system</scope>
-			<systemPath>${basedir}/src/main/resources/lib/AnalyzeSkeleton_-2.0.0-SNAPSHOT.jar</systemPath>
 		</dependency>
 	</dependencies>
 	<repositories>

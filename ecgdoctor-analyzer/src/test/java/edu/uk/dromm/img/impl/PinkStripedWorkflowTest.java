@@ -28,11 +28,10 @@ public class PinkStripedWorkflowTest{
   public void variants() {
     final URL[] resources = new URL[]{
         this.getClass().getResource("/image/ecg-pink-M234Mo253Std23Sk-2Ku14.jpg"),
-        this.getClass().getResource("/image/ecg-pink-M227Mo255Std41Sk-3Ku13.jpg"),
-        this.getClass().getResource("/image/ecg-pink-M201Mo234Std41Sk-1Ku0.jpg"),
-        this.getClass().getResource("/image/ecg-pink-M235Mo255Std31Sk-4Ku22.jpg"),
+        this.getClass().getResource("/image/ecg-pink-M227Mo255Std41Sk-3Ku13.gif"),
         this.getClass().getResource("/image/ecg-pink-M224Mo249Std39Sk-2Ku7.jpg"),
-        this.getClass().getResource("/image/ecg-pink-M201Mo234Std41Sk-1Ku0.jpg")
+        this.getClass().getResource("/image/ecg-pink-M235Mo255Std31Sk-4Ku22.jpg"),
+        this.getClass().getResource("/image/ecg-pink-M201Mo234Std41Sk-1Ku0.jpg"),
     };
     produceVariants(resources);
   }
@@ -46,12 +45,12 @@ public class PinkStripedWorkflowTest{
         final ByteProcessor ip = (ByteProcessor)new ColorProcessor(bi).convertToByte(false);
         new PinkStripedWorkflow().execute(ip);
         final ImageStatistics is = ip.getStatistics();
+        final String[] splitted = url.getPath().split("/");
         final String formatMessage = "%s of %s is not correct, should be %s, but was %s";
+        ImageIO.write(ip.getBufferedImage(), "png", new FileOutputStream("target/" + splitted[splitted.length - 1].replaceAll("\\..*", "-out.png")));
         Assert.assertTrue(String.format(formatMessage, "Mean", url, ">= 250", is.mean), is.mean >= 250);
         Assert.assertTrue(String.format(formatMessage, "Mode", url, ">= 255", is.mode), is.mode >= 255);
         Assert.assertTrue(String.format(formatMessage, "Standard deviation", url, ">= 22", is.stdDev), is.stdDev >= 22);
-        final String[] splitted = url.getPath().split("/");
-        ImageIO.write(ip.getBufferedImage(), "png", new FileOutputStream("target/" + splitted[splitted.length - 1].replaceAll("\\..*", "-out.png")));
       } catch (final IOException e) {
         e.printStackTrace();
       }
