@@ -1,0 +1,32 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<title>Mi Subida de Archivos</title>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<script src="resources/js/script.js" type="text/javascript"></script>
+<link rel="stylesheet" href="resources/css/style.css" media="screen" />
+</head>
+<body id="background">
+	<div align="middle">
+		<br> <img src="image/uklogotipo.png"> <br> <br>
+		<h1>ECG Doctor</h1>
+		<br>
+	</div>
+	<div align="middle">
+		<form action="http://localhost:8080/ecgdoctor/SubirArchivo"
+			method="post" enctype="multipart/form-data">
+			<br> <br> <br>
+			<div align="middle">
+				<input class="button_file" type="file" name="file" size=”500000″ />
+				<input class="button_submit" type="submit" value="Subir archivo"
+					onclick="detectCharge()" />
+			</div>
+		</form>
+	</div>
+	<br>
+	<br>
+	<br>
+	<img id="p" align="center" class="progressBar"
+		src="image/ajax-loader.gif" alt="cargando..." />
+</body>
+</html>

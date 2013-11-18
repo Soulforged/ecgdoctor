@@ -10,6 +10,7 @@ import ij.process.ImageProcessor;
 
 import java.awt.image.BufferedImage;
 
+import edu.uk.dromm.img.EnhancementStrategy;
 import edu.uk.dromm.img.Factory;
 import edu.uk.dromm.img.ImageParameterProvider;
 import edu.uk.dromm.img.ImageProcess;
@@ -17,17 +18,20 @@ import edu.uk.dromm.img.ImageProcess;
 public class ECGImagePreprocessing implements ImageProcess {
 
   private final ImageParameterProvider ipp;
+  private final EnhancementStrategy es;
 
   public ECGImagePreprocessing() {
-    ipp = new Factory().getImageParameterProvider();
+    final Factory factory = new Factory();
+    ipp = factory.getImageParameterProvider();
+    es = factory.getEnhancementStrategy();
   }
 
   @Override
   public BufferedImage process(final BufferedImage bi) {
     final ImageProcessor ip = new ColorProcessor(bi);
-    final ImageProcessor bp = new BinaryProcessor(
+    final BinaryProcessor bp = new BinaryProcessor(
         (ByteProcessor) ip.convertToByte(false));
-    new HistogramFilter().run(bp);
+    es.workflow(bp.getStatistics()).execute(bp);;
     return bp.getBufferedImage();
   }
 

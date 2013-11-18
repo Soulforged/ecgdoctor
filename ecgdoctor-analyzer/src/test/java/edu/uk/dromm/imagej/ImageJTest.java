@@ -40,8 +40,8 @@ import org.junit.Test;
  */
 public class ImageJTest implements PlugInFilter {
 
-  private final int black = -16777216, white = -1;
-  private final Skeletonize3D sk3d = new Skeletonize3D();;
+  private final int           black = -16777216, white = -1;
+  private final Skeletonize3D sk3d  = new Skeletonize3D();   ;
 
   @Test
   public void colorsFromBlackToWhiteToHexaAreSequential() {
@@ -58,76 +58,78 @@ public class ImageJTest implements PlugInFilter {
       BufferedImage bi;
       ImageProcessor ip;
 
-      //      ecgImage = this.getClass().getResource("/image/ecg-byn.jpg");
-      //      Assert.assertNotNull(ecgImage);
-      //      bi = ImageIO.read(ecgImage);
-      //      ip = new ColorProcessor(bi);
-      //      doRun(ip, "target/ecg-byn-out.png");
+      // ecgImage = this.getClass().getResource("/image/ecg-byn.jpg");
+      // Assert.assertNotNull(ecgImage);
+      // bi = ImageIO.read(ecgImage);
+      // ip = new ColorProcessor(bi);
+      // doRun(ip, "target/ecg-byn-out.png");
 
-      ecgImage = this.getClass().getResource("/image/ecg-pink-M234Mo253Std23Sk-2Ku14.jpg");
+      ecgImage = this.getClass().getResource(
+          "/image/ecg-pink-M234Mo253Std23Sk-2Ku14.jpg");
       Assert.assertNotNull(ecgImage);
       bi = ImageIO.read(ecgImage);
       ip = new ColorProcessor(bi);
       doRun(ip, "target/ecg-pink-M234Mo253Std23Sk-2Ku14-out.png");
 
-      ecgImage = this.getClass().getResource("/image/ecg-pink-M227Mo255Std41Sk-3Ku13.gif");
+      ecgImage = this.getClass().getResource(
+          "/image/ecg-pink-M227Mo255Std41Sk-3Ku13.gif");
       Assert.assertNotNull(ecgImage);
       bi = ImageIO.read(ecgImage);
       ip = new ColorProcessor(bi);
       doRun(ip, "target/ecg-pink-M227Mo255Std41Sk-3Ku13.png");
 
-      //      ecgImage = this.getClass().getResource("/image/ecg-pink-3.jpg");
-      //      Assert.assertNotNull(ecgImage);
-      //      bi = ImageIO.read(ecgImage);
-      //      ip = new ColorProcessor(bi);
-      //      doRun(ip, "target/ecg-pink-3-out.png");
+      // ecgImage = this.getClass().getResource("/image/ecg-pink-3.jpg");
+      // Assert.assertNotNull(ecgImage);
+      // bi = ImageIO.read(ecgImage);
+      // ip = new ColorProcessor(bi);
+      // doRun(ip, "target/ecg-pink-3-out.png");
       //
-      //      ecgImage = this.getClass().getResource("/image/ecg-pink-4.png");
-      //      Assert.assertNotNull(ecgImage);
-      //      bi = ImageIO.read(ecgImage);
-      //      ip = new ColorProcessor(bi);
-      //      doRun(ip, "target/ecg-pink-4-out.png");
+      // ecgImage = this.getClass().getResource("/image/ecg-pink-4.png");
+      // Assert.assertNotNull(ecgImage);
+      // bi = ImageIO.read(ecgImage);
+      // ip = new ColorProcessor(bi);
+      // doRun(ip, "target/ecg-pink-4-out.png");
       //
-      //      ecgImage = this.getClass().getResource("/image/ecg-pink-5.jpg");
-      //      Assert.assertNotNull(ecgImage);
-      //      bi = ImageIO.read(ecgImage);
-      //      ip = new ColorProcessor(bi);
-      //      doRun(ip, "target/ecg-pink-5-out.png");
+      // ecgImage = this.getClass().getResource("/image/ecg-pink-5.jpg");
+      // Assert.assertNotNull(ecgImage);
+      // bi = ImageIO.read(ecgImage);
+      // ip = new ColorProcessor(bi);
+      // doRun(ip, "target/ecg-pink-5-out.png");
       //
-      //      ecgImage = this.getClass().getResource(
-      //          "/image/ecg-pink-2-year-old-boy.jpg");
-      //      Assert.assertNotNull(ecgImage);
-      //      bi = ImageIO.read(ecgImage);
-      //      ip = new ColorProcessor(bi);
-      //      doRun(ip, "target/ecg-pink-2-year-old-boy-out.png");
+      // ecgImage = this.getClass().getResource(
+      // "/image/ecg-pink-2-year-old-boy.jpg");
+      // Assert.assertNotNull(ecgImage);
+      // bi = ImageIO.read(ecgImage);
+      // ip = new ColorProcessor(bi);
+      // doRun(ip, "target/ecg-pink-2-year-old-boy-out.png");
 
-      //      ecgImage = this.getClass().getResource(
-      //          "/image/ecg-transparent-background-1.gif");
-      //      Assert.assertNotNull(ecgImage);
-      //      bi = ImageIO.read(ecgImage);
-      //      ip = new ColorProcessor(bi);
-      //      doRun(ip, "target/ecg-transparent-background-1-out.png");
+      // ecgImage = this.getClass().getResource(
+      // "/image/ecg-transparent-background-1.gif");
+      // Assert.assertNotNull(ecgImage);
+      // bi = ImageIO.read(ecgImage);
+      // ip = new ColorProcessor(bi);
+      // doRun(ip, "target/ecg-transparent-background-1-out.png");
       //
-      //      ecgImage = this.getClass().getResource(
-      //          "/image/ecg-white-background-1.jpg");
-      //      Assert.assertNotNull(ecgImage);
-      //      bi = ImageIO.read(ecgImage);
-      //      ip = new ColorProcessor(bi);
-      //      doRun(ip, "target/ecg-white-background-1-out.png");
+      // ecgImage = this.getClass().getResource(
+      // "/image/ecg-white-background-1.jpg");
+      // Assert.assertNotNull(ecgImage);
+      // bi = ImageIO.read(ecgImage);
+      // ip = new ColorProcessor(bi);
+      // doRun(ip, "target/ecg-white-background-1-out.png");
       //
-      //      ecgImage = this.getClass().getResource(
-      //          "/image/ecg-white-background-2.png");
-      //      Assert.assertNotNull(ecgImage);
-      //      bi = ImageIO.read(ecgImage);
-      //      ip = new ColorProcessor(bi);
-      //      doRun(ip, "target/ecg-white-background-2-out.png");
+      // ecgImage = this.getClass().getResource(
+      // "/image/ecg-white-background-2.png");
+      // Assert.assertNotNull(ecgImage);
+      // bi = ImageIO.read(ecgImage);
+      // ip = new ColorProcessor(bi);
+      // doRun(ip, "target/ecg-white-background-2-out.png");
       //
-      //      ecgImage =
-      //          this.getClass().getResource("/image/ecg-blue-background.jpg");
-      //      Assert.assertNotNull(ecgImage);
-      //      bi = ImageIO.read(ecgImage);
-      //      ip = new ColorProcessor(bi);
-      //      doRun(ip, "target/ecg-blue-background-out.png");
+      // ecgImage =
+      // this.getClass().getResource("/image/ecg-blue-background.jpg");
+      // Assert.assertNotNull(ecgImage);
+      // bi = ImageIO.read(ecgImage);
+      // ip = new ColorProcessor(bi);
+      // doRun(ip, "target/ecg-blue-background-out.png");
 
     } catch (final IOException e) {
       Assert.fail(e.getLocalizedMessage());
@@ -319,12 +321,12 @@ public class ImageJTest implements PlugInFilter {
       final ImagePlus imagePlus = new ImagePlus("", proc);
 
       final OwnFFTFilter fft = new OwnFFTFilter();
-      fft.filter(proc, 5, 3, 2, 5);
-      fft.filter(proc, 5, 3, 1, 5);
+      fft.filter(proc, 3, 3, 2, 5);
+      fft.filter(proc, 3, 3, 1, 5);
 
       final BackgroundSubtracter bs = new BackgroundSubtracter();
       bs.setup("", imagePlus);
-      bs.rollingBallBackground(proc, 0.1d, false, true, true, false, false);
+      bs.rollingBallBackground(proc, 0.05d, false, true, true, false, false);
 
       proc.autoThreshold();
 
@@ -333,6 +335,7 @@ public class ImageJTest implements PlugInFilter {
       ImageIO.write(ip.getBufferedImage(), "png", new File(outFile.getPath()
           .replaceAll(".png", "-pure.png")));
       ImageIO.write(proc.getBufferedImage(), "png", outFile);
+
     } catch (final IOException e) {
       e.printStackTrace();
     }
@@ -366,7 +369,7 @@ public class ImageJTest implements PlugInFilter {
 
   class ThresholdMethodStatistics implements
   Comparable<ThresholdMethodStatistics> {
-    private final int thresh;
+    private final int    thresh;
     private final String name;
 
     public ThresholdMethodStatistics(final int thresh, final String name) {
