@@ -13,7 +13,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -52,7 +51,7 @@ public class ECGImageAnalisys implements ImageProcess {
 	public BufferedImage process(final BufferedImage bi) {
 		final ImageProcessor ip = new BinaryProcessor(new ByteProcessor(bi));
 		final List<Point> zeroes = zeroes(ip);
-		final List<Point> firstThreeZeroes = zeroes.subList(0, 2);
+		final List<Point> firstThreeZeroes = zeroes.subList(0, 3);
 		final double gridCellProportionY = 0.037593985;
 		final double gridCellProportionX = 0.0208333333;
 		final double cellHeightInPx = ip.getHeight() * gridCellProportionY;
@@ -222,17 +221,48 @@ public class ECGImageAnalisys implements ImageProcess {
 			CollectionUtils.filter(newPoints, new NearPoint(p, nearNess));
 			pointsPerY.put(p.y, newPoints);
 		}
-		final Map<Integer, Point> firstPointPerY = new HashMap<Integer, Point>();
+		final Map<Point, Integer> yPerFirstPoint = new TreeMap<>(
+				new PointsOnXMinimumFirst());
+		final Map<Integer, Point> firstPointPerY = new TreeMap<Integer, Point>(
+				new IntegerComparator());
 		for (final Integer y : pointsPerY.keySet()) {
-			firstPointPerY.put(y, pointsPerY.get(y).iterator().next());
+			final Point first = pointsPerY.get(y).iterator().next();
+			firstPointPerY.put(y, first);
+			yPerFirstPoint.put(first, y);
 		}
+		System.out.println("Y per first point: " + yPerFirstPoint);
+		System.out.println("First point per Y: " + firstPointPerY);
 		final Set<Integer> averages = averageToMinimum(firstPointPerY.keySet());
 		System.out.println(averages);
 		final List<Point> zeroes = new ArrayList<Point>();
 		for (final Integer y : averages) {
-			zeroes.add(firstPointPerY.get(y));
+			zeroes.add(getMinimum(y, firstPointPerY));
 		}
 		return zeroes;
+	}
+
+	class PointsOnXMinimumFirst implements Comparator<Point> {
+		@Override
+		public int compare(final Point p1, final Point p2) {
+			if (p1.equals(p2)) {
+				return 0;
+			}
+			if (p1.x == p2.x) {
+				return p1.y > p2.y ? 1 : -1;
+			}
+			if (p1.x > p2.x) {
+				return 1;
+			}
+			return -1;
+		}
+	}
+
+	private Point getMinimum(final int y,
+			final Map<Integer, Point> firstPointsPerY) {
+		if (firstPointsPerY.containsKey(y - 1)) {
+			return getMinimum(y - 1, firstPointsPerY);
+		}
+		return firstPointsPerY.get(y);
 	}
 
 	public List<Point> allPoints(final ImageProcessor ip) {
