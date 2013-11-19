@@ -18,15 +18,14 @@ VAR_OUTPUT
 END_VAR
 
 FUZZIFY rr
-  TERM normal := gbell 342 10 750;
-  TERM steady := gbell 342 10 1100;
+  TERM normal := gbell 342 10 1335;
   TERM short := sigm -0.02 1000;
   TERM long := sigm 0.02 1675;
 END_FUZZIFY
 
 FUZZIFY pv
-  TERM absent := (0.0, 1.0) (0.6, 0.0);
-  TERM present := (0.6, 0.0) (1.0, 1.0);
+  TERM absent := (0.0, 1.0) (6.0, 0.0);
+  TERM present := (6.0, 0.0) (10.0, 1.0);
 END_FUZZIFY
 
 FUZZIFY qrs
@@ -58,8 +57,4 @@ RULEBLOCK No1
               THEN result IS cardiopathy;
 END_RULEBLOCK
 
-END_FUNCTION_BLOCK
-
-FUNCTION_BLOCK lead1
-  
 END_FUNCTION_BLOCK
