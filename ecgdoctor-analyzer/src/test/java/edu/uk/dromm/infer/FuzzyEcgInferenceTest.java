@@ -8,6 +8,7 @@ import net.sourceforge.jFuzzyLogic.rule.Variable;
 
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 public class FuzzyEcgInferenceTest {
@@ -87,6 +88,7 @@ public class FuzzyEcgInferenceTest {
   }
 
   @Test
+  @Ignore("Only for visualization purposes")
   public void chart(){
     fis.chart();
     while(true);
