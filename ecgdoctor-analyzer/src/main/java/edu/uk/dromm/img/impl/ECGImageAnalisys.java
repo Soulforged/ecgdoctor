@@ -272,7 +272,6 @@ public class ECGImageAnalisys implements ImageProcess {
     public int hashCode() {
       final int prime = 31;
       int result = 1;
-      result = prime * result + getOuterType().hashCode();
       result = prime * result + y;
       return result;
     }
@@ -285,25 +284,18 @@ public class ECGImageAnalisys implements ImageProcess {
       if (getClass() != obj.getClass())
         return false;
       final PointCount other = (PointCount) obj;
-      if (!getOuterType().equals(other.getOuterType()))
-        return false;
       if (y != other.y)
         return false;
       return true;
     }
-    /* (non-Javadoc)
-     * @see java.lang.Comparable#compareTo(java.lang.Object)
-     */
+
     @Override
     public int compareTo(final PointCount o) {
       if(count > o.count)
-        return 1;
-      if(count < o.count)
         return -1;
-      return 0;
-    }
-    private ECGImageAnalisys getOuterType() {
-      return ECGImageAnalisys.this;
+      if(count < o.count)
+        return 1;
+      return Integer.valueOf(y).compareTo(o.y);
     }
   }
 

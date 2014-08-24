@@ -20,6 +20,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TreeMap;
 
@@ -42,6 +43,8 @@ import edu.uk.dromm.img.impl.ECGImageAnalisys.PointCount;
  */
 public class ECGImageAnalisysTest {
 
+  private static BinaryProcessor bp;
+
   @Test
   @Ignore
   public void process(){
@@ -60,6 +63,46 @@ public class ECGImageAnalisysTest {
     final ECGImageAnalisys ana = new ECGImageAnalisys(0);
     obtainingZeroes(ana, ip);
     ana.process(resultantBi);
+  }
+
+  @Test
+  public void highestContinuousPointCountPerHeightCanBeUsedAsAFactorForZeroing(){
+    final ImageProcessor ip = getImageProcessor("/image/ecg-pink-M234Mo253Std23Sk-2Ku14.jpg");
+    final ECGImageAnalisys ana = new ECGImageAnalisys(0);
+    final List<Point> allPoints = ana.allPoints(ip);
+    final List<Point> allPointsI = ana.allPoints(allPoints,1,ip.getWidth());
+    final Set<Integer> heightsOrdered = ana.differentHeights(allPointsI);
+    final Map<Integer, List<Point>> allPointsPerHeight = ana.allPointsPerHeight(allPointsI, heightsOrdered);
+    final Map<Integer, List<Integer>> allLenghtsPerHeight = new HashMap<>();
+    for(final Entry<Integer, List<Point>> entry : allPointsPerHeight.entrySet()){
+      final List<Integer> lengths = new ArrayList<>();
+      final List<Point> list = entry.getValue();
+      int count = 0;
+      for(int i = 0;i < list.size() - 1;i++){
+        final int diff = list.get(i + 1).x - list.get(i).x;
+        if(diff <= 1)
+          count++;
+        else {
+          if(count > 0)
+            lengths.add(count);
+          count = 0;
+        }
+      }
+      if(!lengths.isEmpty())
+        allLenghtsPerHeight.put(entry.getKey(), lengths);
+    }
+    System.out.println(allLenghtsPerHeight);
+  }
+
+  @Test
+  public void highestPointCountPerSectionMatchesZeroesOnThoseSections(){
+    final ImageProcessor ip = getImageProcessor("/image/ecg-pink-M234Mo253Std23Sk-2Ku14.jpg");
+    final ECGImageAnalisys ana = new ECGImageAnalisys(0);
+    final List<Point> allPoints = ana.allPoints(ip);
+    final List<Point> allPointsI = ana.allPoints(allPoints,1,ip.getWidth());
+    final Set<Integer> heightsOrdered = ana.differentHeights(allPointsI);
+    final Set<PointCount> counts = ana.countPointsPerHeight(ana.allPointsPerHeight(allPointsI, heightsOrdered), 0, ip.getWidth());
+    System.out.println(counts);
   }
 
   @Test
@@ -178,22 +221,25 @@ public class ECGImageAnalisysTest {
     final Set<Integer> differentHeights = ana.differentHeights(allPoints);
     final Map<Integer, List<Point>> allPointsPerHeight = ana.allPointsPerHeight(allPoints, differentHeights);
     final Set<PointCount> pointsCount = ana.countPointsPerHeight(allPointsPerHeight, 0,ip.getWidth());
-    Assert.assertEquals(487, pointsCount.size());
+    Assert.assertEquals(differentHeights.size(), pointsCount.size());
   }
 
-  private ImageProcessor getImageProcessor(final String imageResourcePath){
-    final URL ecgImage = this.getClass().getResource(imageResourcePath);
-    Assert.assertNotNull(ecgImage);
-    BufferedImage bi = null;
-    try {
-      bi = ImageIO.read(ecgImage);
-    } catch (final IOException e) {
-      e.printStackTrace();
+  private static ImageProcessor getImageProcessor(final String imageResourcePath){
+    if(bp == null){
+      final URL ecgImage = ECGImageAnalisysTest.class.getResource(imageResourcePath);
+      Assert.assertNotNull(ecgImage);
+      BufferedImage bi = null;
+      try {
+        bi = ImageIO.read(ecgImage);
+      } catch (final IOException e) {
+        e.printStackTrace();
+      }
+      final ImageProcess pre = new ECGImagePreprocessing();
+      final BufferedImage resultantBi = pre.process(bi);
+      bp = new BinaryProcessor(
+          new ByteProcessor(resultantBi));
     }
-    final ImageProcess pre = new ECGImagePreprocessing();
-    final BufferedImage resultantBi = pre.process(bi);
-    return new BinaryProcessor(
-        new ByteProcessor(resultantBi));
+    return bp;
   }
 
   private void obtainingZeroes(final ECGImageAnalisys ecgim, final ImageProcessor ip) {
