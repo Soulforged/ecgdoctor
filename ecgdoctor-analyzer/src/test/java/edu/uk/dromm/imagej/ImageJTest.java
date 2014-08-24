@@ -4,7 +4,9 @@
 package edu.uk.dromm.imagej;
 
 import ij.ImagePlus;
+import ij.plugin.Harris_;
 import ij.plugin.filter.BackgroundSubtracter;
+import ij.plugin.filter.Convolver;
 import ij.plugin.filter.OwnFFTFilter;
 import ij.plugin.filter.PlugInFilter;
 import ij.plugin.filter.Skeletonize3D;
@@ -32,6 +34,7 @@ import java.util.Map;
 import javax.imageio.ImageIO;
 
 import org.junit.Assert;
+import org.junit.Ignore;
 import org.junit.Test;
 
 /**
@@ -336,6 +339,44 @@ public class ImageJTest implements PlugInFilter {
           .replaceAll(".png", "-pure.png")));
       ImageIO.write(proc.getBufferedImage(), "png", outFile);
 
+    } catch (final IOException e) {
+      e.printStackTrace();
+    }
+  }
+
+  @Test
+  @Ignore
+  public void detectSquarePulse() {
+    final URL ecgImage = this.getClass().getResource(
+        "/image/ecg-pink-M201Mo234Std41Sk-1Ku0.jpg");
+    BufferedImage bi;
+    try {
+      bi = ImageIO.read(ecgImage);
+      final ImageProcessor ip = new ColorProcessor(bi);
+      final BinaryProcessor bp = new BinaryProcessor(
+          (ByteProcessor) ip.convertToByte(false));
+      final Convolver conv = new Convolver();
+      final BinaryProcessor proc = (BinaryProcessor) bp.convertToByte(false);
+      final ImagePlus imP = new ImagePlus("", proc);
+      conv.setup("", imP);
+      conv.setNormalize(false);
+      //      final OwnFFTFilter fft = new OwnFFTFilter();
+      //      fft.filter(ip, 3, 3, 2, 5);
+      //      fft.filter(ip, 3, 3, 1, 5);
+      //      conv.convolve(proc,new float[] {
+      //          -4, -4, -4, -4, -4,
+      //          -1, -1, -1, -1, -1,
+      //          32, 16, 0, 16, 32,
+      //          -1, -1, -1, -1, -1,
+      //          -4, -4, -4, -4, -4}, 5, 5);
+      final Harris_ harr = new Harris_();
+      //      harr.setup("", imP);
+      harr.filter(proc, 10, 8, 1);
+      //      harr.run(proc);
+      ImageIO.write(ip.getBufferedImage(), "png", new File(
+          "target/ecg-pink-org.png"));
+      ImageIO.write(proc.getBufferedImage(), "png", new File(
+          "target/ecg-pink-detected.png"));
     } catch (final IOException e) {
       e.printStackTrace();
     }
