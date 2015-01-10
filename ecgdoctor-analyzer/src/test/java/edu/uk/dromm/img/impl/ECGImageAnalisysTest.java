@@ -11,22 +11,16 @@ import java.awt.Point;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.net.URL;
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
-import java.util.TreeMap;
 
 import javax.imageio.ImageIO;
 
-import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.Predicate;
 import org.junit.Assert;
 import org.junit.Ignore;
@@ -35,7 +29,9 @@ import org.junit.Test;
 import edu.uk.dromm.img.ECGPoint;
 import edu.uk.dromm.img.ImageProcess;
 import edu.uk.dromm.img.ecg.exception.InvalidECGSectionException;
+import edu.uk.dromm.img.impl.ECGImageAnalisys.HeightLengths;
 import edu.uk.dromm.img.impl.ECGImageAnalisys.PointCount;
+import edu.uk.dromm.img.impl.ECGImageAnalisys.Range;
 
 /**
  * @author magian
@@ -47,8 +43,9 @@ public class ECGImageAnalisysTest {
 
   @Test
   @Ignore
-  public void process(){
-    final URL ecgImage = this.getClass().getResource("/image/ecg-pink-M234Mo253Std23Sk-2Ku14.jpg");
+  public void process() {
+    final URL ecgImage = this.getClass().getResource(
+        "/image/ecg-pink-M234Mo253Std23Sk-2Ku14.jpg");
     Assert.assertNotNull(ecgImage);
     BufferedImage bi = null;
     try {
@@ -66,47 +63,126 @@ public class ECGImageAnalisysTest {
   }
 
   @Test
-  public void highestContinuousPointCountPerHeightCanBeUsedAsAFactorForZeroing(){
+  public void canCalibratePoints() {
     final ImageProcessor ip = getImageProcessor("/image/ecg-pink-M234Mo253Std23Sk-2Ku14.jpg");
     final ECGImageAnalisys ana = new ECGImageAnalisys(0);
     final List<Point> allPoints = ana.allPoints(ip);
-    final List<Point> allPointsI = ana.allPoints(allPoints,1,ip.getWidth());
+    final List<Point> allPointsI = ana.allPoints(allPoints, 1, ip.getWidth());
     final Set<Integer> heightsOrdered = ana.differentHeights(allPointsI);
-    final Map<Integer, List<Point>> allPointsPerHeight = ana.allPointsPerHeight(allPointsI, heightsOrdered);
-    final Map<Integer, List<Integer>> allLenghtsPerHeight = new HashMap<>();
-    for(final Entry<Integer, List<Point>> entry : allPointsPerHeight.entrySet()){
-      final List<Integer> lengths = new ArrayList<>();
-      final List<Point> list = entry.getValue();
-      int count = 0;
-      for(int i = 0;i < list.size() - 1;i++){
-        final int diff = list.get(i + 1).x - list.get(i).x;
-        if(diff <= 1)
-          count++;
-        else {
-          if(count > 0)
-            lengths.add(count);
-          count = 0;
-        }
-      }
-      if(!lengths.isEmpty())
-        allLenghtsPerHeight.put(entry.getKey(), lengths);
-    }
+    final List<Range> ranges = ana.heightRanges(heightsOrdered, 30);
+    final List<Range> relevantRanges = ana.relevantRanges(ranges, 25);
+    final Map<Integer, List<Point>> allPointsPerHeight = ana
+        .allPointsPerHeight(allPointsI, heightsOrdered);
+    final List<HeightLengths> allLenghtsPerHeight = ana
+        .mapLengths(allPointsPerHeight);
+    final int height = ana.zeroByHeightMargins(relevantRanges.get(1).begin,
+        relevantRanges.get(1).end, allLenghtsPerHeight);
+    final List<Point> pointsInLeadII = ana.pointsInLead(relevantRanges, 1,
+        allPointsI);
+    System.out.println(pointsInLeadII);
+    final List<Point> calibratedPoints = ana.calibrate(pointsInLeadII, height);
+    System.out.println(calibratedPoints);
+    Assert.assertEquals(pointsInLeadII.size(), calibratedPoints.size());
+  }
+
+  @Test
+  public void canFilterPointByLatitude() {
+    final ImageProcessor ip = getImageProcessor("/image/ecg-pink-M234Mo253Std23Sk-2Ku14.jpg");
+    final ECGImageAnalisys ana = new ECGImageAnalisys(0);
+    final List<Point> allPoints = ana.allPoints(ip);
+    final List<Point> allPointsI = ana.allPoints(allPoints, 1, ip.getWidth());
+    final Set<Integer> heightsOrdered = ana.differentHeights(allPointsI);
+    final List<Range> ranges = ana.heightRanges(heightsOrdered, 30);
+    final List<Range> relevantRanges = ana.relevantRanges(ranges, 25);
+    System.out.println(relevantRanges);
+    final List<Point> points = ana.pointsInLead(relevantRanges, 1, allPointsI);
+    System.out.println(points);
+  }
+
+  @Test
+  public void canExtractRelevantRanges() {
+    final ImageProcessor ip = getImageProcessor("/image/ecg-pink-M234Mo253Std23Sk-2Ku14.jpg");
+    final ECGImageAnalisys ana = new ECGImageAnalisys(0);
+    final List<Point> allPoints = ana.allPoints(ip);
+    final List<Point> allPointsI = ana.allPoints(allPoints, 1, ip.getWidth());
+    final Set<Integer> heightsOrdered = ana.differentHeights(allPointsI);
+    final List<Range> ranges = ana.heightRanges(heightsOrdered, 30);
+    System.out.println(ranges);
+    final List<Range> relevantRanges = ana.relevantRanges(ranges, 25);
+    System.out.println(relevantRanges);
+    Assert.assertEquals(4, relevantRanges.size());
+  }
+
+  @Test
+  public void getHighestPointCountBetweenVerticalMargins() {
+    final ImageProcessor ip = getImageProcessor("/image/ecg-pink-M234Mo253Std23Sk-2Ku14.jpg");
+    final ECGImageAnalisys ana = new ECGImageAnalisys(0);
+    final List<Point> allPoints = ana.allPoints(ip);
+    final List<Point> allPointsI = ana.allPoints(allPoints, 1, ip.getWidth());
+    final Set<Integer> heightsOrdered = ana.differentHeights(allPointsI);
+    final Map<Integer, List<Point>> allPointsPerHeight = ana
+        .allPointsPerHeight(allPointsI, heightsOrdered);
+    final List<Range> relevantRanges = ana.relevantRanges(
+        ana.heightRanges(heightsOrdered, 30), 25);
+    final List<HeightLengths> allLenghtsPerHeight = ana
+        .mapLengths(allPointsPerHeight);
+    int height = ana.zeroByHeightMargins(relevantRanges.get(0).begin,
+        relevantRanges.get(0).end, allLenghtsPerHeight);
+    Assert.assertEquals(71, height);
+    height = ana.zeroByHeightMargins(relevantRanges.get(1).begin,
+        relevantRanges.get(1).end, allLenghtsPerHeight);
+    Assert.assertEquals(226, height);
+    height = ana.zeroByHeightMargins(relevantRanges.get(2).begin,
+        relevantRanges.get(2).end, allLenghtsPerHeight);
+    Assert.assertEquals(370, height);
+    height = ana.zeroByHeightMargins(relevantRanges.get(3).begin,
+        relevantRanges.get(3).end, allLenghtsPerHeight);
+    Assert.assertEquals(523, height);
+  }
+
+  @Test
+  public void canObtainDifferentRanges() {
+    final ImageProcessor ip = getImageProcessor("/image/ecg-pink-M234Mo253Std23Sk-2Ku14.jpg");
+    final ECGImageAnalisys ana = new ECGImageAnalisys(0);
+    final List<Point> allPoints = ana.allPoints(ip);
+    final List<Point> allPointsI = ana.allPoints(allPoints, 1, ip.getWidth());
+    final Set<Integer> heightsOrdered = ana.differentHeights(allPointsI);
+    System.out.println(heightsOrdered);
+    final List<Range> ranges = ana.heightRanges(heightsOrdered, 30);
+    System.out.println(ranges);
+    Assert.assertEquals(8, ranges.size());
+  }
+
+  @Test
+  public void highestContinuousPointCountPerHeightCanBeUsedAsAFactorForZeroing() {
+    final ImageProcessor ip = getImageProcessor("/image/ecg-pink-M234Mo253Std23Sk-2Ku14.jpg");
+    final ECGImageAnalisys ana = new ECGImageAnalisys(0);
+    final List<Point> allPoints = ana.allPoints(ip);
+    final List<Point> allPointsI = ana.allPoints(allPoints, 1, ip.getWidth());
+    final Set<Integer> heightsOrdered = ana.differentHeights(allPointsI);
+    final Map<Integer, List<Point>> allPointsPerHeight = ana
+        .allPointsPerHeight(allPointsI, heightsOrdered);
+    final List<HeightLengths> allLenghtsPerHeight = ana
+        .mapLengths(allPointsPerHeight);
+    System.out.println(allLenghtsPerHeight);
+    Collections.sort(allLenghtsPerHeight, HeightLengths.sumDesc());
     System.out.println(allLenghtsPerHeight);
   }
 
   @Test
-  public void highestPointCountPerSectionMatchesZeroesOnThoseSections(){
+  public void highestPointCountPerSectionMatchesZeroesOnThoseSections() {
     final ImageProcessor ip = getImageProcessor("/image/ecg-pink-M234Mo253Std23Sk-2Ku14.jpg");
     final ECGImageAnalisys ana = new ECGImageAnalisys(0);
     final List<Point> allPoints = ana.allPoints(ip);
-    final List<Point> allPointsI = ana.allPoints(allPoints,1,ip.getWidth());
+    final List<Point> allPointsI = ana.allPoints(allPoints, 1, ip.getWidth());
     final Set<Integer> heightsOrdered = ana.differentHeights(allPointsI);
-    final Set<PointCount> counts = ana.countPointsPerHeight(ana.allPointsPerHeight(allPointsI, heightsOrdered), 0, ip.getWidth());
+    final Set<PointCount> counts = ana.countPointsPerHeight(
+        ana.allPointsPerHeight(allPointsI, heightsOrdered), 0, ip.getWidth());
     System.out.println(counts);
   }
 
   @Test
-  public void scanningAllPointsForHeightsReturnsAllTheDifferentHeightsInDescendingOrder(){
+  public void scanningAllPointsForHeightsReturnsAllTheDifferentHeightsInDescendingOrder() {
     final ImageProcessor ip = getImageProcessor("/image/ecg-pink-M234Mo253Std23Sk-2Ku14.jpg");
     final ECGImageAnalisys ana = new ECGImageAnalisys(0);
     final List<Point> allPoints = ana.allPoints(ip);
@@ -116,7 +192,7 @@ public class ECGImageAnalisysTest {
     final Integer first = heightsIterator.next();
     Assert.assertTrue(first < heightsIterator.next());
     Integer lastHeight = first;
-    while(heightsIterator.hasNext())
+    while (heightsIterator.hasNext())
       lastHeight = heightsIterator.next();
     Assert.assertTrue(first < lastHeight);
     Assert.assertEquals(Integer.valueOf(2), first);
@@ -125,7 +201,7 @@ public class ECGImageAnalisysTest {
   }
 
   @Test
-  public void allPointsGivesAGivenCount(){
+  public void allPointsGivesAGivenCount() {
     final ImageProcessor ip = getImageProcessor("/image/ecg-pink-M234Mo253Std23Sk-2Ku14.jpg");
     final ECGImageAnalisys ana = new ECGImageAnalisys(0);
     final List<Point> allPoints = ana.allPoints(ip);
@@ -133,15 +209,16 @@ public class ECGImageAnalisysTest {
   }
 
   @Test
-  public void allPointsAtAGivenSectionGiveAGivenCount(){
+  public void allPointsAtAGivenSectionGiveAGivenCount() {
     final ImageProcessor ip = getImageProcessor("/image/ecg-pink-M234Mo253Std23Sk-2Ku14.jpg");
     final ECGImageAnalisys ana = new ECGImageAnalisys(0);
     final List<Point> allPoints = ana.allPoints(ip);
-    try{
+    try {
       ana.allPoints(allPoints, 0, ip.getWidth());
-      Assert.fail("ECG segmentation is not 0 based, first index is 1, therefore "
-          + "trying to get the points in any section below 1 is wrong");
-    }catch(final InvalidECGSectionException e){
+      Assert
+          .fail("ECG segmentation is not 0 based, first index is 1, therefore "
+              + "trying to get the points in any section below 1 is wrong");
+    } catch (final InvalidECGSectionException e) {
     }
     final List<Point> all1Points = ana.allPoints(allPoints, 1, ip.getWidth());
     Assert.assertEquals(1519, all1Points.size());
@@ -153,80 +230,89 @@ public class ECGImageAnalisysTest {
     Assert.assertEquals(2514, all4Points.size());
     Assert.assertTrue(8335 >= all1Points.size() + all2Points.size()
         + all3Points.size() + all4Points.size());
-    try{
+    try {
       ana.allPoints(allPoints, 5, ip.getWidth());
-      Assert.fail("Section 5 does not exist in a typical ECG, therefore trying "
-          + "to get the points in that section is conceptually wrong.");
-    }catch(final InvalidECGSectionException e){
+      Assert
+          .fail("Section 5 does not exist in a typical ECG, therefore trying "
+              + "to get the points in that section is conceptually wrong.");
+    } catch (final InvalidECGSectionException e) {
     }
   }
 
   @Test
-  public void pointCountRemainsInsideSection(){
+  public void pointCountRemainsInsideSection() {
     final ImageProcessor ip = getImageProcessor("/image/ecg-pink-M234Mo253Std23Sk-2Ku14.jpg");
     final ECGImageAnalisys ana = new ECGImageAnalisys(0);
     final List<Point> allPoints = ana.allPoints(ip);
     final List<Point> all1Points = ana.allPoints(allPoints, 1, ip.getWidth());
     final Set<Integer> heights = ana.differentHeights(all1Points);
-    final Map<Integer, List<Point>> pointsPerHeight = ana.allPointsPerHeight(all1Points, heights);
-    final Set<PointCount> counts = ana.countPointsPerHeight(pointsPerHeight, 0, ip.getWidth());
+    final Map<Integer, List<Point>> pointsPerHeight = ana.allPointsPerHeight(
+        all1Points, heights);
+    final Set<PointCount> counts = ana.countPointsPerHeight(pointsPerHeight, 0,
+        ip.getWidth());
+    System.out.println(counts);
     Assert.assertEquals(heights.size(), counts.size());
     int totalCount = 0;
-    for(final PointCount pc : counts)
+    for (final PointCount pc : counts)
       totalCount += pc.count;
     Assert.assertEquals(all1Points.size(), totalCount);
   }
 
   @Test
-  public void scanningAHeightForPointsReturnsThePointsAtThatHeight(){
+  public void scanningAHeightForPointsReturnsThePointsAtThatHeight() {
     final ImageProcessor ip = getImageProcessor("/image/ecg-pink-M234Mo253Std23Sk-2Ku14.jpg");
     final ECGImageAnalisys ana = new ECGImageAnalisys(0);
     final List<Point> allPoints = ana.allPoints(ip);
-    final List<Point> pointsFiltered = ana.allPointsAt(219,allPoints);
+    final List<Point> pointsFiltered = ana.allPointsAt(219, allPoints);
     Assert.assertEquals(88, pointsFiltered.size());
   }
 
   @Test
-  public void scanningAtAllHeightsReturnsThePointsAtThoseHeights(){
+  public void scanningAtAllHeightsReturnsThePointsAtThoseHeights() {
     final ImageProcessor ip = getImageProcessor("/image/ecg-pink-M234Mo253Std23Sk-2Ku14.jpg");
     final ECGImageAnalisys ana = new ECGImageAnalisys(0);
     final List<Point> allPoints = ana.allPoints(ip);
     final Set<Integer> differentHeights = ana.differentHeights(allPoints);
-    final Map<Integer, List<Point>> pointsClassified = ana.allPointsPerHeight(allPoints, differentHeights);
+    final Map<Integer, List<Point>> pointsClassified = ana.allPointsPerHeight(
+        allPoints, differentHeights);
     Assert.assertEquals(differentHeights, pointsClassified.keySet());
     Assert.assertEquals(differentHeights.size(), pointsClassified.size());
     Assert.assertEquals(88, pointsClassified.get(219).size());
     int totalCount = 0;
-    for(final List<Point> pc : pointsClassified.values())
+    for (final List<Point> pc : pointsClassified.values())
       totalCount += pc.size();
     Assert.assertEquals("The sum of all points at all heights must be equal "
-        + "to the count of all points.",allPoints.size(), totalCount);
+        + "to the count of all points.", allPoints.size(), totalCount);
   }
 
   @Test
-  public void countingHorizontallyShouldCountAllPointsAtAGivenHeight(){
+  public void countingHorizontallyShouldCountAllPointsAtAGivenHeight() {
     final ImageProcessor ip = getImageProcessor("/image/ecg-pink-M234Mo253Std23Sk-2Ku14.jpg");
     final ECGImageAnalisys ana = new ECGImageAnalisys(0);
     final List<Point> allPoints = ana.allPoints(ip);
-    final PointCount pointsCount = ana.countPointsAtHeight(ana.allPointsAt(219, allPoints), 0, ip.getWidth());
+    final PointCount pointsCount = ana.countPointsAtHeight(
+        ana.allPointsAt(219, allPoints), 0, ip.getWidth());
     Assert.assertEquals(219, pointsCount.y);
     Assert.assertEquals(88, pointsCount.count);
   }
 
   @Test
-  public void countingHorizontallyShouldCountAllPointsAtAllHeights(){
+  public void countingHorizontallyShouldCountAllPointsAtAllHeights() {
     final ImageProcessor ip = getImageProcessor("/image/ecg-pink-M234Mo253Std23Sk-2Ku14.jpg");
     final ECGImageAnalisys ana = new ECGImageAnalisys(0);
     final List<Point> allPoints = ana.allPoints(ip);
     final Set<Integer> differentHeights = ana.differentHeights(allPoints);
-    final Map<Integer, List<Point>> allPointsPerHeight = ana.allPointsPerHeight(allPoints, differentHeights);
-    final Set<PointCount> pointsCount = ana.countPointsPerHeight(allPointsPerHeight, 0,ip.getWidth());
+    final Map<Integer, List<Point>> allPointsPerHeight = ana
+        .allPointsPerHeight(allPoints, differentHeights);
+    final Set<PointCount> pointsCount = ana.countPointsPerHeight(
+        allPointsPerHeight, 0, ip.getWidth());
     Assert.assertEquals(differentHeights.size(), pointsCount.size());
   }
 
-  private static ImageProcessor getImageProcessor(final String imageResourcePath){
-    if(bp == null){
-      final URL ecgImage = ECGImageAnalisysTest.class.getResource(imageResourcePath);
+  private static ImageProcessor getImageProcessor(final String imageResourcePath) {
+    if (bp == null) {
+      final URL ecgImage = ECGImageAnalisysTest.class
+          .getResource(imageResourcePath);
       Assert.assertNotNull(ecgImage);
       BufferedImage bi = null;
       try {
@@ -236,121 +322,41 @@ public class ECGImageAnalisysTest {
       }
       final ImageProcess pre = new ECGImagePreprocessing();
       final BufferedImage resultantBi = pre.process(bi);
-      bp = new BinaryProcessor(
-          new ByteProcessor(resultantBi));
+      bp = new BinaryProcessor(new ByteProcessor(resultantBi));
     }
     return bp;
   }
 
-  private void obtainingZeroes(final ECGImageAnalisys ecgim, final ImageProcessor ip) {
+  private void obtainingZeroes(final ECGImageAnalisys ecgim,
+      final ImageProcessor ip) {
     final List<Point> zeroes = ecgim.zeroes(ip);
     Assert.assertFalse(zeroes.isEmpty());
     Assert.assertEquals(4, zeroes.size());
-    assertZeroesInRange(zeroes, Arrays.asList(new Point[]{new ECGPoint(0, 70), new ECGPoint(0, 219), new ECGPoint(0, 365), new ECGPoint(0, 516)}), 2.0);
+    assertZeroesInRange(
+        zeroes,
+        Arrays.asList(new Point[] { new ECGPoint(0, 70), new ECGPoint(0, 219),
+            new ECGPoint(0, 365), new ECGPoint(0, 516) }), 2.0);
     System.out.println(zeroes);
   }
 
-  private void assertZeroesInRange(final List<Point> points, final List<Point> asserted, final double margin){
+  private void assertZeroesInRange(final List<Point> points,
+      final List<Point> asserted, final double margin) {
     Assert.assertFalse(asserted.isEmpty());
     Assert.assertEquals(points.size(), asserted.size());
-    for(int i = 0; i < points.size(); i++){
+    for (int i = 0; i < points.size(); i++) {
       final Point org = points.get(i);
       final Point ass = asserted.get(i);
-      //      Assert.assertTrue(String.format("Point: %s, at index '%s' should be at a margin of %s from Point: %s", org, i, margin, ass),ass.x - margin <= org.x && org.x <= ass.x + margin);
-      Assert.assertTrue(String.format("Point: %s, at index '%s' should be at a margin of %s from Point: %s", org, i, margin, ass), ass.y - margin <= org.y && org.y <= ass.y + margin);
+      // Assert.assertTrue(String.format("Point: %s, at index '%s' should be at a margin of %s from Point: %s",
+      // org, i, margin, ass),ass.x - margin <= org.x && org.x <= ass.x +
+      // margin);
+      Assert
+          .assertTrue(
+              String
+                  .format(
+                      "Point: %s, at index '%s' should be at a margin of %s from Point: %s",
+                      org, i, margin, ass), ass.y - margin <= org.y
+                  && org.y <= ass.y + margin);
     }
-  }
-
-  @Test
-  @Ignore
-  public void obtainingZeroesLineMethod(){
-    final URL ecgImage = this.getClass().getResource("/image/ecg-pink-M234Mo253Std23Sk-2Ku14.jpg");
-    Assert.assertNotNull(ecgImage);
-    BufferedImage bi = null;
-    try {
-      bi = ImageIO.read(ecgImage);
-    } catch (final IOException e) {
-      e.printStackTrace();
-    }
-    final ImageProcess pre = new ECGImagePreprocessing();
-    final BufferedImage resultantBi = pre.process(bi);
-    final ImageProcessor ip = new BinaryProcessor(
-        new ByteProcessor(resultantBi));
-    final ECGImageAnalisys ana = new ECGImageAnalisys(0);
-    final List<Point> allPoints = ana.allPoints(ip);
-    final Map<Integer, Integer> highestPointCount = new TreeMap<Integer,Integer>(new IntegerComparator());
-    for(int i = 0; i < ip.getHeight(); i++){
-      final List<Point> allPointsCopy = new ArrayList<Point>(allPoints);
-      CollectionUtils.filter(allPointsCopy, new YPoints(i));
-      highestPointCount.put(allPointsCopy.size(), i);
-    }
-    Assert.assertFalse(highestPointCount.isEmpty());
-    System.out.println(highestPointCount);
-    final Map<Integer, Collection<Point>> pointsPerY = new TreeMap<Integer, Collection<Point>>();
-    final int nearNess = 1;
-    for (final Point p : allPoints) {
-      final Collection<Point> newPoints = new ArrayList<Point>(allPoints);
-      CollectionUtils.filter(newPoints, new NearPoint(p, nearNess));
-      pointsPerY.put(p.y, newPoints);
-    }
-    final Map<Integer, Point> firstPointPerY = new HashMap<Integer, Point>();
-    for (final Integer y : pointsPerY.keySet())
-      firstPointPerY.put(y, pointsPerY.get(y).iterator().next());
-    }
-    System.out.println(firstPointPerY);
-    final Collection<Integer> intersection = CollectionUtils.intersection(firstPointPerY.keySet(), highestPointCount.values());
-    final List<Integer> sortableIntersection = new ArrayList<Integer>(intersection);
-    Collections.sort(sortableIntersection);
-    System.out.println(sortableIntersection);
-    final double gridCellProportionY = 0.037593985;
-    final double cellHeightInPx = ip.getHeight() * gridCellProportionY;
-    final int maxY = new Double(cellHeightInPx * 3).intValue();
-    final List<Integer> firstPoints = new ArrayList<Integer>(
-        sortableIntersection);
-    CollectionUtils.filter(firstPoints, new ByYSeparation(firstPoints.get(0),
-        maxY));
-    final List<Integer> secondPoints = new ArrayList<Integer>(
-        sortableIntersection);
-    CollectionUtils.filter(
-        secondPoints,
-        new ByYSeparation(
-            secondPoints.get(firstPoints.get(firstPoints.size() - 1)), maxY));
-    final List<Integer> thirdPoints = new ArrayList<Integer>(
-        sortableIntersection);
-    CollectionUtils.filter(
-        firstPoints,
-        new ByYSeparation(
-            thirdPoints.get(secondPoints.get(secondPoints.size() - 1)), maxY));
-    final List<Integer> definitiveList = new ArrayList<Integer>();
-    int previousElement = 0;
-    for (final Integer i : sortableIntersection) {
-      if (previousElement == 0 || previousElement + maxY < i) {
-        definitiveList.add(i);
-        previousElement = i;
-      }
-    }
-    System.out.println(definitiveList);
-  }
-
-  @Test
-  public void proportionsTest() {
-    final URL ecgImage = this.getClass().getResource(
-        "/image/ecg-pink-M234Mo253Std23Sk-2Ku14.jpg");
-    Assert.assertNotNull(ecgImage);
-    BufferedImage bi = null;
-    try {
-      bi = ImageIO.read(ecgImage);
-    } catch (final IOException e) {
-      e.printStackTrace();
-    }
-    final ImageProcess pre = new ECGImagePreprocessing();
-    final BufferedImage resultantBi = pre.process(bi);
-    final ImageProcessor ip = new BinaryProcessor(
-        new ByteProcessor(resultantBi));
-    final double gridCellProportionY = 0.037593985;
-    final double cellHeightInPx = ip.getHeight() * gridCellProportionY;
-    final int maxY = new Double(cellHeightInPx * 3).intValue();
-    System.out.println(maxY);
   }
 
   class ByYSeparation implements Predicate {
@@ -373,7 +379,7 @@ public class ECGImageAnalisysTest {
   class NearPoint implements Predicate {
 
     private final Point centralPoint;
-    private final int nearNess;
+    private final int   nearNess;
 
     public NearPoint(final Point central, final int nearNess) {
       super();
@@ -390,7 +396,6 @@ public class ECGImageAnalisysTest {
         return Math.abs(point.y - centralPoint.y) == nearNess;
       else if (point.y == centralPoint.y)
         return Math.abs(point.x - centralPoint.x) == nearNess;
-      }
       return false;
     }
   }
@@ -402,7 +407,7 @@ public class ECGImageAnalisysTest {
     }
   }
 
-  class XPoints implements Predicate{
+  class XPoints implements Predicate {
 
     private final int x;
 
@@ -411,20 +416,21 @@ public class ECGImageAnalisysTest {
       this.x = x;
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see org.apache.commons.collections.Predicate#evaluate(java.lang.Object)
      */
     @Override
     public boolean evaluate(final Object p) {
-      final Point point = (Point)p;
-      if(point.x == x)
+      final Point point = (Point) p;
+      if (point.x == x)
         return true;
-      }
       return false;
     }
   }
 
-  class YPoints implements Predicate{
+  class YPoints implements Predicate {
 
     private final int y;
 
@@ -433,15 +439,16 @@ public class ECGImageAnalisysTest {
       this.y = y;
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see org.apache.commons.collections.Predicate#evaluate(java.lang.Object)
      */
     @Override
     public boolean evaluate(final Object p) {
-      final Point point = (Point)p;
-      if(point.y == y)
+      final Point point = (Point) p;
+      if (point.y == y)
         return true;
-      }
       return false;
     }
   }

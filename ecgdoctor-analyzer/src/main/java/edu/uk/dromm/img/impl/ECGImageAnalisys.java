@@ -16,16 +16,17 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
+import org.apache.commons.collections.Closure;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.Predicate;
 import org.apache.commons.collections.Transformer;
 import org.apache.commons.collections.list.TreeList;
 
-import edu.uk.dromm.img.DefaultECGImageAnalysis;
 import edu.uk.dromm.img.ECGPoint;
 import edu.uk.dromm.img.ImageProcess;
 import edu.uk.dromm.img.ecg.exception.InvalidECGSectionException;
@@ -34,10 +35,9 @@ import edu.uk.dromm.img.ecg.exception.InvalidECGSectionException;
  * @author magian
  *
  */
-@Deprecated
 public class ECGImageAnalisys implements ImageProcess {
 
-  private int blackValue = 0;
+  private int         blackValue   = 0;
   private final float avgLeadWidth = 0.2400620201f;
 
   /**
@@ -48,9 +48,135 @@ public class ECGImageAnalisys implements ImageProcess {
     this.blackValue = blackValue;
   }
 
+  public List<HeightLengths> mapLengths(
+      final Map<Integer, List<Point>> allPointsPerHeight) {
+    final List<HeightLengths> allLenghtsPerHeight = new ArrayList<>();
+    for (final Entry<Integer, List<Point>> entry : allPointsPerHeight
+        .entrySet()) {
+      final List<Integer> lengths = new ArrayList<>();
+      final List<Point> list = entry.getValue();
+      int count = 0;
+      for (int i = 0; i < list.size() - 1; i++) {
+        final int diff = list.get(i + 1).x - list.get(i).x;
+        if (diff <= 1)
+          count++;
+        else {
+          if (count > 0)
+            lengths.add(count);
+          count = 0;
+        }
+      }
+      if (!lengths.isEmpty())
+        allLenghtsPerHeight.add(new HeightLengths(entry.getKey(), lengths));
+    }
+    Collections.sort(allLenghtsPerHeight);
+    return allLenghtsPerHeight;
+  }
+
+  public List<Range> heightRanges(
+      final Collection<Integer> differentHeightsOrdered, final int margin) {
+    final List<Range> ranges = new ArrayList<>();
+    final ArrayList<Integer> hList = new ArrayList<>(differentHeightsOrdered);
+    int firstBound = hList.get(0);
+    for (int i = 0; i < hList.size() - 1; i++) {
+      final Integer height = hList.get(i);
+      final Integer height1 = hList.get(i + 1);
+      if (height1 - height >= margin) {
+        ranges.add(new Range(firstBound, height));
+        firstBound = height1;
+      }
+    }
+    ranges.add(new Range(firstBound, hList.get(hList.size() - 1)));
+    return ranges;
+  }
+
+  public static class Range {
+    public int begin, end;
+
+    public Range(final int begin, final int end) {
+      super();
+      this.begin = begin;
+      this.end = end;
+    }
+
+    @Override
+    public String toString() {
+      return String.format("[%s-%s]", begin, end);
+    }
+  }
+
+  public int zeroByHeightMargins(final int lowerMargin, final int upperMargin,
+      final List<HeightLengths> lengths) {
+    HeightLengths maxL = lengths.get(0);
+    for (final HeightLengths hl : lengths)
+      if (lowerMargin <= hl.getHeight() && hl.getHeight() <= upperMargin
+          && maxL.sum < hl.sum)
+        maxL = hl;
+    return maxL.height;
+  }
+
+  static class HeightLengths implements Comparable<HeightLengths> {
+
+    private final Integer height;
+    private final Integer size;
+    private Integer       sum = new Integer(0);
+
+    public HeightLengths(final Integer height, final List<Integer> lengths) {
+      super();
+      this.height = height;
+      size = lengths.size();
+      CollectionUtils.forAllDo(lengths, new Closure() {
+        @Override
+        public void execute(final Object l) {
+          sum += (Integer) l;
+        }
+      });
+    }
+
+    public Integer getHeight() {
+      return height;
+    }
+
+    public Integer getSize() {
+      return size;
+    }
+
+    public Integer getSum() {
+      return sum;
+    }
+
+    @Override
+    public String toString() {
+      return String.format("%s:%s:%s", height, size, sum);
+    }
+
+    @Override
+    public int compareTo(final HeightLengths o) {
+      final int lenDiff = size - o.getSize();
+      if (lenDiff != 0)
+        return lenDiff * -1;
+      final int sumDiff = sum - o.getSum();
+      if (sumDiff != 0)
+        return sumDiff;
+      return height.compareTo(o.getHeight());
+    }
+
+    public static Comparator<HeightLengths> sumDesc() {
+      return new Comparator<ECGImageAnalisys.HeightLengths>() {
+        @Override
+        public int compare(final HeightLengths o1, final HeightLengths o2) {
+          final int sumDiff = o1.getSum() - o2.getSum();
+          if (sumDiff != 0)
+            return sumDiff * -1;
+          return o1.compareTo(o2);
+        }
+      };
+    }
+  }
+
   /*
    * (non-Javadoc)
-   *
+   * 
    * @see edu.uk.dromm.img.ImageProcess#process(java.awt.image.BufferedImage)
    */
   @Override
@@ -154,7 +280,7 @@ public class ECGImageAnalisys implements ImageProcess {
 
   private void print(final String title, final List<Point> points) {
     System.out
-    .println(String.format(" ============= %s ============= ", title));
+        .println(String.format(" ============= %s ============= ", title));
     for (final Point p : points)
       System.out.println(p);
   }
@@ -203,21 +329,22 @@ public class ECGImageAnalisys implements ImageProcess {
    * @return
    */
   public Set<PointCount> countPointsPerHeight(
-      final Map<Integer, List<Point>> allPointsAtHeight, final int offSet,final int width) {
+      final Map<Integer, List<Point>> allPointsAtHeight, final int offSet,
+      final int width) {
     final Set<PointCount> counts = new TreeSet<>();
-    for(final Integer h: allPointsAtHeight.keySet())
+    for (final Integer h : allPointsAtHeight.keySet())
       counts.add(countPointsAtHeight(allPointsAtHeight.get(h), offSet, width));
     return counts;
   }
 
-  public Set<Integer> differentHeights(final List<Point> allPoints){
+  public Set<Integer> differentHeights(final List<Point> allPoints) {
     final Set<Integer> heights = new TreeSet<>();
-    for(final Point p : allPoints)
+    for (final Point p : allPoints)
       heights.add(p.y);
     return heights;
   }
 
-  public List<Point> allPointsAt(final int y, final List<Point> allPoints){
+  public List<Point> allPointsAt(final int y, final List<Point> allPoints) {
     final List<Point> copy = new TreeList(allPoints);
     CollectionUtils.filter(copy, new PointsOnY(y));
     return copy;
@@ -228,15 +355,17 @@ public class ECGImageAnalisys implements ImageProcess {
    * @param differentHeights
    * @return
    */
-  public Map<Integer, List<Point>> allPointsPerHeight(final List<Point> allPoints,
-      final Set<Integer> differentHeights) {
-    final Map<Integer, List<Point>> allPointsPerHeight = new HashMap<>(differentHeights.size());
-    for(final Integer height : differentHeights)
+  public Map<Integer, List<Point>> allPointsPerHeight(
+      final List<Point> allPoints, final Set<Integer> differentHeights) {
+    final Map<Integer, List<Point>> allPointsPerHeight = new HashMap<>(
+        differentHeights.size());
+    for (final Integer height : differentHeights)
       allPointsPerHeight.put(height, allPointsAt(height, allPoints));
     return allPointsPerHeight;
   }
 
-  public PointCount countPointsAtHeight(final List<Point> allPointsAtHeight, final int offSet, final int width){
+  public PointCount countPointsAtHeight(final List<Point> allPointsAtHeight,
+      final int offSet, final int width) {
     final List<Point> allPointsCopy = new TreeList(allPointsAtHeight);
     CollectionUtils.filter(allPointsCopy, new PointsBeetweenX(offSet, width));
     return new PointCount(allPointsAtHeight.get(0).y, allPointsCopy.size());
@@ -247,27 +376,30 @@ public class ECGImageAnalisys implements ImageProcess {
    * @param i
    * @return
    */
-  public List<Point> allPoints(final List<Point> allPoints, final int i, final int width) {
-    if(i < 1 || i > 4)
+  public List<Point> allPoints(final List<Point> allPoints, final int i,
+      final int width) {
+    if (i < 1 || i > 4)
       throw new InvalidECGSectionException();
     final List<Point> copy = new TreeList(allPoints);
-    final int prevI = i -1;
-    CollectionUtils.filter(copy, new PointsBeetweenX(prevI * avgLeadWidth * width,
-        avgLeadWidth * i * width));
+    final int prevI = i - 1;
+    CollectionUtils.filter(copy, new PointsBeetweenX(prevI * avgLeadWidth
+        * width, avgLeadWidth * i * width));
     return copy;
   }
 
-  class PointCount implements Comparable<PointCount>{
+  class PointCount implements Comparable<PointCount> {
     public int y;
     public int count;
+
     public PointCount(final int y, final int count) {
       super();
       this.y = y;
       this.count = count;
     }
+
     @Override
     public String toString() {
-      return "["+y + "," + count + "]";
+      return "[" + y + "," + count + "]";
     }
 
     @Override
@@ -277,6 +409,7 @@ public class ECGImageAnalisys implements ImageProcess {
       result = prime * result + y;
       return result;
     }
+
     @Override
     public boolean equals(final Object obj) {
       if (this == obj)
@@ -293,9 +426,9 @@ public class ECGImageAnalisys implements ImageProcess {
 
     @Override
     public int compareTo(final PointCount o) {
-      if(count > o.count)
+      if (count > o.count)
         return -1;
-      if(count < o.count)
+      if (count < o.count)
         return 1;
       return Integer.valueOf(y).compareTo(o.y);
     }
@@ -306,7 +439,8 @@ public class ECGImageAnalisys implements ImageProcess {
    * <ol>
    * <li>Filter a vertical lane of only the first points to the left margin. A
    * %1 of the total image horizontal size.</li>
-   * <li>Obtain closest points to each of the central points in that lane by x/y inside margin.</li>
+   * <li>Obtain closest points to each of the central points in that lane by x/y
+   * inside margin.</li>
    * </ol>
    *
    * @param ip
@@ -317,7 +451,7 @@ public class ECGImageAnalisys implements ImageProcess {
     final List<Point> allPoints = ana.allPoints(ip);
     final List<Point> ps = new ArrayList<Point>(allPoints);
     final Point lastPoint = ps.get(ps.size() - 1);
-    //    final int lastPointOnX = Double.valueOf(lastPoint.x).intValue();
+    // final int lastPointOnX = Double.valueOf(lastPoint.x).intValue();
     final int lastPointOnX = ip.getWidth();
 
     CollectionUtils.filter(ps, new PointsBeetweenX(0, lastPointOnX));
@@ -344,13 +478,14 @@ public class ECGImageAnalisys implements ImageProcess {
       pointsPerY.put(p.y, newPoints);
     }
 
-    final Map<Integer, Integer> countPointsPerY = new TreeMap<>(new IntegerComparator());
-    for(final Point p : ps){
+    final Map<Integer, Integer> countPointsPerY = new TreeMap<>(
+        new IntegerComparator());
+    for (final Point p : ps) {
       final Collection<Point> newPoints = new ArrayList<Point>(allPoints);
       CollectionUtils.filter(newPoints, new Predicate() {
         @Override
         public boolean evaluate(final Object arg0) {
-          final Point po = (Point)arg0;
+          final Point po = (Point) arg0;
           return po.y == p.y;
         }
       });
@@ -430,7 +565,7 @@ public class ECGImageAnalisys implements ImageProcess {
 
     /*
      * (non-Javadoc)
-     *
+     * 
      * @see org.apache.commons.collections.Predicate#evaluate(java.lang.Object)
      */
     @Override
@@ -444,7 +579,7 @@ public class ECGImageAnalisys implements ImageProcess {
 
   class PointsOnY implements Predicate {
 
-    private final int               y;
+    private final int y;
 
     public PointsOnY(final int y) {
       super();
@@ -595,5 +730,50 @@ public class ECGImageAnalisys implements ImageProcess {
     }
   }
 
+  public List<Range> relevantRanges(final List<Range> ranges,
+      final int minAmplitude) {
+    final List<Range> copy = new ArrayList<>(ranges);
+    CollectionUtils.filter(copy, byRangeAmplitude(minAmplitude));
+    return copy;
+  }
 
+  public static Predicate byRangeAmplitude(final int amplitude) {
+    return new Predicate() {
+      @Override
+      public boolean evaluate(final Object orange) {
+        final Range range = (Range) orange;
+        return range.end - range.begin >= amplitude;
+      }
+    };
+  }
+
+  public List<Point> pointsInLead(final List<Range> relevantRanges,
+      final int i, final List<Point> allPointsI) {
+    final List<Point> copy = new ArrayList<>(allPointsI);
+    final Range range = relevantRanges.get(i);
+    CollectionUtils.filter(copy, byLatitude(range));
+    return copy;
+  }
+
+  public static Predicate byLatitude(final Range range) {
+    return new Predicate() {
+      @Override
+      public boolean evaluate(final Object opoint) {
+        final Point point = (Point) opoint;
+        return range.begin <= point.y && point.y <= range.end;
+      }
+    };
+  }
+
+  public List<Point> calibrate(final List<Point> pointsInLeadII, final int zero) {
+    final List<Point> copy = new ArrayList<>(pointsInLeadII);
+    CollectionUtils.transform(copy, new Transformer() {
+      @Override
+      public Object transform(final Object opoint) {
+        final Point point = (Point) opoint;
+        return new ECGPoint(point.x, zero - point.y);
+      }
+    });
+    return copy;
+  }
 }

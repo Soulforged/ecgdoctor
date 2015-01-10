@@ -1,5 +1,5 @@
 /**
- * 
+ *
  */
 package edu.uk.dromm.img;
 
@@ -7,7 +7,7 @@ import java.awt.Point;
 
 /**
  * @author magian
- * 
+ *
  */
 public class ECGPoint extends Point {
   private static final long serialVersionUID = -5691847930011897169L;
@@ -22,11 +22,11 @@ public class ECGPoint extends Point {
 
   /*
    * (non-Javadoc)
-   * 
+   *
    * @see java.lang.Object#toString()
    */
   @Override
   public String toString() {
-    return x + "," + y;
+    return String.format("(%s, %s)", x, y);
   }
 }

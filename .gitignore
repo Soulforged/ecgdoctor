@@ -6,3 +6,4 @@ target/
 work/
 .tomcatplugin
 .#webclasspath
+.~*
