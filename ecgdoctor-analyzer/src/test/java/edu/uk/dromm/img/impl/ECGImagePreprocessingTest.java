@@ -1,5 +1,5 @@
 /**
- * 
+ *
  */
 package edu.uk.dromm.img.impl;
 
@@ -19,30 +19,25 @@ import edu.uk.dromm.img.ImageProcess;
 
 /**
  * @author dicardo
- * 
+ *
  */
 public class ECGImagePreprocessingTest {
 
   private final ImageProcess histogramSegmentation = new ECGImagePreprocessing();
 
   @Test
-  public void processLeadsToATwoBitImage() {
-    try {
-      final URL ecgImage = this.getClass().getResource("/image/ecg-byn.jpg");
-      Assert.assertNotNull(ecgImage);
-      final BufferedImage bi = ImageIO.read(ecgImage);
-      BufferedImage result = histogramSegmentation.process(bi);
-      final ImageProcessor ip = new ColorProcessor(result);
-      final int[] histogram = ip.getHistogram();
-      Assert.assertTrue(histogram[0] > 0);
-      Assert.assertTrue(histogram[255] > 0);
-      for (int i = 1; i < histogram.length - 1; i++) {
-        Assert.assertTrue(histogram[i] == 0);
-      }
-    } catch (final IOException e) {
-      Assert.fail(e.getLocalizedMessage());
-      e.printStackTrace();
-    }
+  public void processLeadsToATwoBitImage() throws IOException {
+    final URL ecgImage = this.getClass().getResource(
+        "/image/ecg-pink-typical-normal.gif");
+    Assert.assertNotNull(ecgImage);
+    final BufferedImage bi = ImageIO.read(ecgImage);
+    final BufferedImage result = histogramSegmentation.process(bi);
+    final ImageProcessor ip = new ColorProcessor(result);
+    final int[] histogram = ip.getHistogram();
+    Assert.assertTrue(histogram[0] > 0);
+    Assert.assertTrue(histogram[255] > 0);
+    for (int i = 1; i < histogram.length - 1; i++)
+      Assert.assertTrue(histogram[i] == 0);
   }
 
 }

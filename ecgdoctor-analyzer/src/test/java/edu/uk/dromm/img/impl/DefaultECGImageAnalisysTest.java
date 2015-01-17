@@ -38,7 +38,7 @@ import edu.uk.dromm.img.ecg.exception.InvalidECGSectionException;
  * @author magian
  *
  */
-public class ECGImageAnalisysTest {
+public class DefaultECGImageAnalisysTest {
 
   private static BinaryProcessor bp;
 
@@ -314,7 +314,7 @@ public class ECGImageAnalisysTest {
 
   private static ImageProcessor getImageProcessor(final String imageResourcePath) {
     if (bp == null) {
-      final URL ecgImage = ECGImageAnalisysTest.class
+      final URL ecgImage = DefaultECGImageAnalisysTest.class
           .getResource(imageResourcePath);
       Assert.assertNotNull(ecgImage);
       BufferedImage bi = null;
