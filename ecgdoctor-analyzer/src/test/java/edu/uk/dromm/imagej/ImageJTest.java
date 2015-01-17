@@ -1,5 +1,5 @@
 /**
- * 
+ *
  */
 package edu.uk.dromm.imagej;
 
@@ -39,12 +39,12 @@ import org.junit.Test;
 
 /**
  * @author dicardo
- * 
+ *
  */
 public class ImageJTest implements PlugInFilter {
 
-  private final int           black = -16777216, white = -1;
-  private final Skeletonize3D sk3d  = new Skeletonize3D();   ;
+  private final int black = -16777216, white = -1;
+  private final Skeletonize3D sk3d = new Skeletonize3D();
 
   @Test
   public void colorsFromBlackToWhiteToHexaAreSequential() {
@@ -144,7 +144,7 @@ public class ImageJTest implements PlugInFilter {
   public void filtering() {
     final String[] imagePathsToProcess = new String[] { "ecg-byn", "ecg-pink" };
     try {
-      final Map<Integer, String> iToName = new HashMap<Integer, String>();
+      final Map<Integer, String> iToName = new HashMap<>();
       iToName.put(0, "blur");
       iToName.put(1, "edges");
       iToName.put(2, "median");
@@ -174,7 +174,7 @@ public class ImageJTest implements PlugInFilter {
   public void thresholding() {
     final String[] imagePathsToProcess = new String[] { "ecg-byn", "ecg-pink" };
     try {
-      final List<ThresholdMethodStatistics> methodStats = new ArrayList<ThresholdMethodStatistics>();
+      final List<ThresholdMethodStatistics> methodStats = new ArrayList<>();
       for (final String imagePath : imagePathsToProcess) {
         final URL ecgImage = this.getClass().getResource(
             "/image/" + imagePath + ".jpg");
@@ -314,7 +314,7 @@ public class ImageJTest implements PlugInFilter {
     // doRun(ip, "Dani.png");
   }
 
-  private void doRun(final ImageProcessor ip, final String stringOut) {
+  private static void doRun(final ImageProcessor ip, final String stringOut) {
     final File outFile = new File(stringOut);
     try {
       System.out.println("============= " + stringOut + " =============");
@@ -360,19 +360,19 @@ public class ImageJTest implements PlugInFilter {
       final ImagePlus imP = new ImagePlus("", proc);
       conv.setup("", imP);
       conv.setNormalize(false);
-      //      final OwnFFTFilter fft = new OwnFFTFilter();
-      //      fft.filter(ip, 3, 3, 2, 5);
-      //      fft.filter(ip, 3, 3, 1, 5);
-      //      conv.convolve(proc,new float[] {
-      //          -4, -4, -4, -4, -4,
-      //          -1, -1, -1, -1, -1,
-      //          32, 16, 0, 16, 32,
-      //          -1, -1, -1, -1, -1,
-      //          -4, -4, -4, -4, -4}, 5, 5);
+      // final OwnFFTFilter fft = new OwnFFTFilter();
+      // fft.filter(ip, 3, 3, 2, 5);
+      // fft.filter(ip, 3, 3, 1, 5);
+      // conv.convolve(proc,new float[] {
+      // -4, -4, -4, -4, -4,
+      // -1, -1, -1, -1, -1,
+      // 32, 16, 0, 16, 32,
+      // -1, -1, -1, -1, -1,
+      // -4, -4, -4, -4, -4}, 5, 5);
       final Harris_ harr = new Harris_();
-      //      harr.setup("", imP);
+      // harr.setup("", imP);
       harr.filter(proc, 10, 8, 1);
-      //      harr.run(proc);
+      // harr.run(proc);
       ImageIO.write(ip.getBufferedImage(), "png", new File(
           "target/ecg-pink-org.png"));
       ImageIO.write(proc.getBufferedImage(), "png", new File(
@@ -382,7 +382,7 @@ public class ImageJTest implements PlugInFilter {
     }
   }
 
-  private void printStatistics(final ImageProcessor ip) {
+  private static void printStatistics(final ImageProcessor ip) {
     System.out.println(String.format("Histogram: %s, %s, %s",
         ip.getHistogramSize(), ip.getHistogramMax(), ip.getHistogramMin()));
     final ImageStatistics ips = ip.getStatistics();
@@ -409,8 +409,8 @@ public class ImageJTest implements PlugInFilter {
   }
 
   class ThresholdMethodStatistics implements
-  Comparable<ThresholdMethodStatistics> {
-    private final int    thresh;
+      Comparable<ThresholdMethodStatistics> {
+    private final int thresh;
     private final String name;
 
     public ThresholdMethodStatistics(final int thresh, final String name) {

@@ -26,12 +26,13 @@ import org.junit.Assert;
 import org.junit.Ignore;
 import org.junit.Test;
 
+import edu.uk.dromm.img.DefaultECGImageAnalisys;
+import edu.uk.dromm.img.DefaultECGImageAnalisys.HeightLengths;
+import edu.uk.dromm.img.DefaultECGImageAnalisys.PointCount;
+import edu.uk.dromm.img.DefaultECGImageAnalisys.Range;
 import edu.uk.dromm.img.ECGPoint;
 import edu.uk.dromm.img.ImageProcess;
 import edu.uk.dromm.img.ecg.exception.InvalidECGSectionException;
-import edu.uk.dromm.img.impl.ECGImageAnalisys.HeightLengths;
-import edu.uk.dromm.img.impl.ECGImageAnalisys.PointCount;
-import edu.uk.dromm.img.impl.ECGImageAnalisys.Range;
 
 /**
  * @author magian
@@ -43,7 +44,7 @@ public class ECGImageAnalisysTest {
 
   @Test
   @Ignore
-  public void process() {
+  public void generateExample() {
     final URL ecgImage = this.getClass().getResource(
         "/image/ecg-pink-M234Mo253Std23Sk-2Ku14.jpg");
     Assert.assertNotNull(ecgImage);
@@ -57,7 +58,7 @@ public class ECGImageAnalisysTest {
     final BufferedImage resultantBi = pre.process(bi);
     final ImageProcessor ip = new BinaryProcessor(
         new ByteProcessor(resultantBi));
-    final ECGImageAnalisys ana = new ECGImageAnalisys(0);
+    final DefaultECGImageAnalisys ana = new DefaultECGImageAnalisys(0);
     obtainingZeroes(ana, ip);
     ana.process(resultantBi);
   }
@@ -65,7 +66,7 @@ public class ECGImageAnalisysTest {
   @Test
   public void canCalibratePoints() {
     final ImageProcessor ip = getImageProcessor("/image/ecg-pink-M234Mo253Std23Sk-2Ku14.jpg");
-    final ECGImageAnalisys ana = new ECGImageAnalisys(0);
+    final DefaultECGImageAnalisys ana = new DefaultECGImageAnalisys(0);
     final List<Point> allPoints = ana.allPoints(ip);
     final List<Point> allPointsI = ana.allPoints(allPoints, 1, ip.getWidth());
     final Set<Integer> heightsOrdered = ana.differentHeights(allPointsI);
@@ -88,7 +89,7 @@ public class ECGImageAnalisysTest {
   @Test
   public void canFilterPointByLatitude() {
     final ImageProcessor ip = getImageProcessor("/image/ecg-pink-M234Mo253Std23Sk-2Ku14.jpg");
-    final ECGImageAnalisys ana = new ECGImageAnalisys(0);
+    final DefaultECGImageAnalisys ana = new DefaultECGImageAnalisys(0);
     final List<Point> allPoints = ana.allPoints(ip);
     final List<Point> allPointsI = ana.allPoints(allPoints, 1, ip.getWidth());
     final Set<Integer> heightsOrdered = ana.differentHeights(allPointsI);
@@ -102,7 +103,7 @@ public class ECGImageAnalisysTest {
   @Test
   public void canExtractRelevantRanges() {
     final ImageProcessor ip = getImageProcessor("/image/ecg-pink-M234Mo253Std23Sk-2Ku14.jpg");
-    final ECGImageAnalisys ana = new ECGImageAnalisys(0);
+    final DefaultECGImageAnalisys ana = new DefaultECGImageAnalisys(0);
     final List<Point> allPoints = ana.allPoints(ip);
     final List<Point> allPointsI = ana.allPoints(allPoints, 1, ip.getWidth());
     final Set<Integer> heightsOrdered = ana.differentHeights(allPointsI);
@@ -116,7 +117,7 @@ public class ECGImageAnalisysTest {
   @Test
   public void getHighestPointCountBetweenVerticalMargins() {
     final ImageProcessor ip = getImageProcessor("/image/ecg-pink-M234Mo253Std23Sk-2Ku14.jpg");
-    final ECGImageAnalisys ana = new ECGImageAnalisys(0);
+    final DefaultECGImageAnalisys ana = new DefaultECGImageAnalisys(0);
     final List<Point> allPoints = ana.allPoints(ip);
     final List<Point> allPointsI = ana.allPoints(allPoints, 1, ip.getWidth());
     final Set<Integer> heightsOrdered = ana.differentHeights(allPointsI);
@@ -143,7 +144,7 @@ public class ECGImageAnalisysTest {
   @Test
   public void canObtainDifferentRanges() {
     final ImageProcessor ip = getImageProcessor("/image/ecg-pink-M234Mo253Std23Sk-2Ku14.jpg");
-    final ECGImageAnalisys ana = new ECGImageAnalisys(0);
+    final DefaultECGImageAnalisys ana = new DefaultECGImageAnalisys(0);
     final List<Point> allPoints = ana.allPoints(ip);
     final List<Point> allPointsI = ana.allPoints(allPoints, 1, ip.getWidth());
     final Set<Integer> heightsOrdered = ana.differentHeights(allPointsI);
@@ -156,7 +157,7 @@ public class ECGImageAnalisysTest {
   @Test
   public void highestContinuousPointCountPerHeightCanBeUsedAsAFactorForZeroing() {
     final ImageProcessor ip = getImageProcessor("/image/ecg-pink-M234Mo253Std23Sk-2Ku14.jpg");
-    final ECGImageAnalisys ana = new ECGImageAnalisys(0);
+    final DefaultECGImageAnalisys ana = new DefaultECGImageAnalisys(0);
     final List<Point> allPoints = ana.allPoints(ip);
     final List<Point> allPointsI = ana.allPoints(allPoints, 1, ip.getWidth());
     final Set<Integer> heightsOrdered = ana.differentHeights(allPointsI);
@@ -172,7 +173,7 @@ public class ECGImageAnalisysTest {
   @Test
   public void highestPointCountPerSectionMatchesZeroesOnThoseSections() {
     final ImageProcessor ip = getImageProcessor("/image/ecg-pink-M234Mo253Std23Sk-2Ku14.jpg");
-    final ECGImageAnalisys ana = new ECGImageAnalisys(0);
+    final DefaultECGImageAnalisys ana = new DefaultECGImageAnalisys(0);
     final List<Point> allPoints = ana.allPoints(ip);
     final List<Point> allPointsI = ana.allPoints(allPoints, 1, ip.getWidth());
     final Set<Integer> heightsOrdered = ana.differentHeights(allPointsI);
@@ -184,7 +185,7 @@ public class ECGImageAnalisysTest {
   @Test
   public void scanningAllPointsForHeightsReturnsAllTheDifferentHeightsInDescendingOrder() {
     final ImageProcessor ip = getImageProcessor("/image/ecg-pink-M234Mo253Std23Sk-2Ku14.jpg");
-    final ECGImageAnalisys ana = new ECGImageAnalisys(0);
+    final DefaultECGImageAnalisys ana = new DefaultECGImageAnalisys(0);
     final List<Point> allPoints = ana.allPoints(ip);
     final Set<Integer> heightsOrdered = ana.differentHeights(allPoints);
     Assert.assertEquals(487, heightsOrdered.size());
@@ -203,7 +204,7 @@ public class ECGImageAnalisysTest {
   @Test
   public void allPointsGivesAGivenCount() {
     final ImageProcessor ip = getImageProcessor("/image/ecg-pink-M234Mo253Std23Sk-2Ku14.jpg");
-    final ECGImageAnalisys ana = new ECGImageAnalisys(0);
+    final DefaultECGImageAnalisys ana = new DefaultECGImageAnalisys(0);
     final List<Point> allPoints = ana.allPoints(ip);
     Assert.assertEquals(8335, allPoints.size());
   }
@@ -211,7 +212,7 @@ public class ECGImageAnalisysTest {
   @Test
   public void allPointsAtAGivenSectionGiveAGivenCount() {
     final ImageProcessor ip = getImageProcessor("/image/ecg-pink-M234Mo253Std23Sk-2Ku14.jpg");
-    final ECGImageAnalisys ana = new ECGImageAnalisys(0);
+    final DefaultECGImageAnalisys ana = new DefaultECGImageAnalisys(0);
     final List<Point> allPoints = ana.allPoints(ip);
     try {
       ana.allPoints(allPoints, 0, ip.getWidth());
@@ -219,6 +220,7 @@ public class ECGImageAnalisysTest {
           .fail("ECG segmentation is not 0 based, first index is 1, therefore "
               + "trying to get the points in any section below 1 is wrong");
     } catch (final InvalidECGSectionException e) {
+      System.out.println("Expected exception was thrown");
     }
     final List<Point> all1Points = ana.allPoints(allPoints, 1, ip.getWidth());
     Assert.assertEquals(1519, all1Points.size());
@@ -236,13 +238,14 @@ public class ECGImageAnalisysTest {
           .fail("Section 5 does not exist in a typical ECG, therefore trying "
               + "to get the points in that section is conceptually wrong.");
     } catch (final InvalidECGSectionException e) {
+      System.out.println("Expected exception was thrown");
     }
   }
 
   @Test
   public void pointCountRemainsInsideSection() {
     final ImageProcessor ip = getImageProcessor("/image/ecg-pink-M234Mo253Std23Sk-2Ku14.jpg");
-    final ECGImageAnalisys ana = new ECGImageAnalisys(0);
+    final DefaultECGImageAnalisys ana = new DefaultECGImageAnalisys(0);
     final List<Point> allPoints = ana.allPoints(ip);
     final List<Point> all1Points = ana.allPoints(allPoints, 1, ip.getWidth());
     final Set<Integer> heights = ana.differentHeights(all1Points);
@@ -261,7 +264,7 @@ public class ECGImageAnalisysTest {
   @Test
   public void scanningAHeightForPointsReturnsThePointsAtThatHeight() {
     final ImageProcessor ip = getImageProcessor("/image/ecg-pink-M234Mo253Std23Sk-2Ku14.jpg");
-    final ECGImageAnalisys ana = new ECGImageAnalisys(0);
+    final DefaultECGImageAnalisys ana = new DefaultECGImageAnalisys(0);
     final List<Point> allPoints = ana.allPoints(ip);
     final List<Point> pointsFiltered = ana.allPointsAt(219, allPoints);
     Assert.assertEquals(88, pointsFiltered.size());
@@ -270,7 +273,7 @@ public class ECGImageAnalisysTest {
   @Test
   public void scanningAtAllHeightsReturnsThePointsAtThoseHeights() {
     final ImageProcessor ip = getImageProcessor("/image/ecg-pink-M234Mo253Std23Sk-2Ku14.jpg");
-    final ECGImageAnalisys ana = new ECGImageAnalisys(0);
+    final DefaultECGImageAnalisys ana = new DefaultECGImageAnalisys(0);
     final List<Point> allPoints = ana.allPoints(ip);
     final Set<Integer> differentHeights = ana.differentHeights(allPoints);
     final Map<Integer, List<Point>> pointsClassified = ana.allPointsPerHeight(
@@ -288,7 +291,7 @@ public class ECGImageAnalisysTest {
   @Test
   public void countingHorizontallyShouldCountAllPointsAtAGivenHeight() {
     final ImageProcessor ip = getImageProcessor("/image/ecg-pink-M234Mo253Std23Sk-2Ku14.jpg");
-    final ECGImageAnalisys ana = new ECGImageAnalisys(0);
+    final DefaultECGImageAnalisys ana = new DefaultECGImageAnalisys(0);
     final List<Point> allPoints = ana.allPoints(ip);
     final PointCount pointsCount = ana.countPointsAtHeight(
         ana.allPointsAt(219, allPoints), 0, ip.getWidth());
@@ -299,7 +302,7 @@ public class ECGImageAnalisysTest {
   @Test
   public void countingHorizontallyShouldCountAllPointsAtAllHeights() {
     final ImageProcessor ip = getImageProcessor("/image/ecg-pink-M234Mo253Std23Sk-2Ku14.jpg");
-    final ECGImageAnalisys ana = new ECGImageAnalisys(0);
+    final DefaultECGImageAnalisys ana = new DefaultECGImageAnalisys(0);
     final List<Point> allPoints = ana.allPoints(ip);
     final Set<Integer> differentHeights = ana.differentHeights(allPoints);
     final Map<Integer, List<Point>> allPointsPerHeight = ana
@@ -327,7 +330,7 @@ public class ECGImageAnalisysTest {
     return bp;
   }
 
-  private void obtainingZeroes(final ECGImageAnalisys ecgim,
+  private static void obtainingZeroes(final DefaultECGImageAnalisys ecgim,
       final ImageProcessor ip) {
     final List<Point> zeroes = ecgim.zeroes(ip);
     Assert.assertFalse(zeroes.isEmpty());
@@ -339,7 +342,7 @@ public class ECGImageAnalisysTest {
     System.out.println(zeroes);
   }
 
-  private void assertZeroesInRange(final List<Point> points,
+  private static void assertZeroesInRange(final List<Point> points,
       final List<Point> asserted, final double margin) {
     Assert.assertFalse(asserted.isEmpty());
     Assert.assertEquals(points.size(), asserted.size());
@@ -379,7 +382,7 @@ public class ECGImageAnalisysTest {
   class NearPoint implements Predicate {
 
     private final Point centralPoint;
-    private final int   nearNess;
+    private final int nearNess;
 
     public NearPoint(final Point central, final int nearNess) {
       super();

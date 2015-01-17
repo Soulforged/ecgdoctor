@@ -1,5 +1,5 @@
 /**
- * 
+ *
  */
 package ij.plugin;
 
@@ -23,32 +23,32 @@ import javax.swing.JOptionPane;
 /**
  * Harris Corner Detector classe che effettua la detection di corners
  * multirisoluzione, in immagini a toni di grigio
- * 
+ *
  * @author Messina Mariagrazia
- * 
+ *
  */
 public class Harris_ implements PlugInFilter {
 
   // lista che conterr� i conrner ad agni iterazione
-  List<int[]>    corners;
+  List<int[]> corners;
 
   // dimensioni di mezza finestra
-  private int    halfwindow    = 0;
+  private int halfwindow = 0;
 
   // varianza della gaussiana
-  private float  gaussiansigma = 0;
+  private float gaussiansigma = 0;
 
   // parametri dii soglia
-  private int    minDistance   = 0;
-  private int    minMeasure    = 0;
-  private int    piramidi      = 0;
+  private int minDistance = 0;
+  private int minMeasure = 0;
+  private int piramidi = 0;
   // oggetto utilizzato per il calcolo del gradiente
-  GradientVector gradient      = new GradientVector();
+  GradientVector gradient = new GradientVector();
   // matrice dei corners
-  int            matriceCorner[][];
+  int matriceCorner[][];
 
   // About...
-  private void showAbout() {
+  private static void showAbout() {
     IJ.showMessage("Harris...", " Harris Corner Detector ");
   }
 
@@ -73,31 +73,31 @@ public class Harris_ implements PlugInFilter {
     gd.addNumericField("Distanza minima", 8, 0);
     gd.addNumericField("Numero di iterazioni da effetture", 1, 0);
 
-    final int halfwindow = 1;
-    float gaussiansigma = 0;
-    int minMeasure = 0;
-    int minDistance = 0;
-    int piramidi = 0;
+    final int halfwindowL = 1;
+    float gaussiansigmaL = 0;
+    int minMeasureL = 0;
+    int minDistanceL = 0;
+    int piramidiL = 0;
     boolean controllo = true;
     while (controllo) {
       gd.showDialog();
       if (gd.wasCanceled())
         return DONE;
 
-      gaussiansigma = (float) gd.getNextNumber();
-      minMeasure = (int) gd.getNextNumber();
-      minDistance = (int) gd.getNextNumber();
-      piramidi = (int) gd.getNextNumber();
-      if (gaussiansigma > 0 && minMeasure >= 0 && minDistance >= 0)
+      gaussiansigmaL = (float) gd.getNextNumber();
+      minMeasureL = (int) gd.getNextNumber();
+      minDistanceL = (int) gd.getNextNumber();
+      piramidiL = (int) gd.getNextNumber();
+      if (gaussiansigmaL > 0 && minMeasureL >= 0 && minDistanceL >= 0)
         controllo = false;
     }
     gd.dispose();
 
-    this.halfwindow = halfwindow;
-    this.gaussiansigma = gaussiansigma;
-    this.minMeasure = minMeasure;
-    this.minDistance = minDistance;
-    this.piramidi = piramidi;
+    halfwindow = halfwindowL;
+    gaussiansigma = gaussiansigmaL;
+    minMeasure = minMeasureL;
+    minDistance = minDistanceL;
+    piramidi = piramidiL;
     return PlugInFilter.DOES_8G;
   }
 
@@ -117,12 +117,11 @@ public class Harris_ implements PlugInFilter {
           "n di iteazioni da effettuare troppo alto,\n sar effettuata una sola iterazione");
     }
 
-    final ByteProcessor newbp;
-    final List<int[]> tmp = new ArrayList<int[]>();
+    final List<int[]> tmp = new ArrayList<>();
     final int[] numero = new int[piramidi];
 
     for (int i = 0; i < piramidi; i++) {
-      corners = new ArrayList<int[]>();
+      corners = new ArrayList<>();
       filter(bp, minMeasure, minDistance, i);
       for (final int[] n : corners)
         tmp.add(n);
@@ -143,16 +142,16 @@ public class Harris_ implements PlugInFilter {
 
   /**
    * Harris Corner Detection
-   * 
+   *
    * @param c
    *          immagine
-   * @param minMeasure
+   * @param minMeasureL
    *          saglio sul valore minimo che assume il corner
-   * @param minDistance
+   * @param minDistanceL
    *          soglia sulla distanza minima tra 2 corners
    */
-  public void filter(final ByteProcessor c, final int minMeasure,
-      final int minDistance, final int factor) {
+  public void filter(final ByteProcessor c, final int minMeasureL,
+      final int minDistanceL, final int factor) {
 
     final int width = c.getWidth();
     final int height = c.getHeight();
@@ -169,7 +168,7 @@ public class Harris_ implements PlugInFilter {
         final int h = (int) spatialMaximaofHarrisMeasure(c, x, y);
 
         // aggiunge il corner alla lista se supera un valore di soglia
-        if (h >= minMeasure) {
+        if (h >= minMeasureL) {
           if (factor != 0) {
             final int XY[] = mappatura(x, y, factor);
             x = XY[0];
@@ -190,7 +189,7 @@ public class Harris_ implements PlugInFilter {
           continue;
         final int dist = (int) Math.sqrt((p[0] - n[0]) * (p[0] - n[0])
             + (p[1] - n[1]) * (p[1] - n[1]));
-        if (dist > minDistance)
+        if (dist > minDistanceL)
           continue;
         if (n[2] < p[2])
           continue;
@@ -207,13 +206,13 @@ public class Harris_ implements PlugInFilter {
   private List<int[]> getCorners() {
     if (corners == null)
       corners = new ArrayList<>();
-      return corners;
+    return corners;
   }
 
   /**
    * reatituisce il valore del pixel (x,y) se � un massimo, altrimenti
    * restituisce -1
-   * 
+   *
    * @param c
    *          immagine
    * @param x
@@ -245,7 +244,7 @@ public class Harris_ implements PlugInFilter {
 
   /**
    * computa harris corner response
-   * 
+   *
    * @param c
    *          Image map
    * @param x
@@ -297,7 +296,7 @@ public class Harris_ implements PlugInFilter {
 
   /**
    * Funzione per il computo della Gaussian window
-   * 
+   *
    * @param x
    *          coordinata x
    * @param y
@@ -307,7 +306,8 @@ public class Harris_ implements PlugInFilter {
    * @return valore della funzione
    */
 
-  private double gaussian(final double x, final double y, final float sigma2) {
+  private static double gaussian(final double x, final double y,
+      final float sigma2) {
     final double t = (x * x + y * y) / (2 * sigma2);
     final double u = 1.0 / (2 * Math.PI * sigma2);
     final double e = u * Math.exp(-t);
@@ -317,7 +317,7 @@ public class Harris_ implements PlugInFilter {
   /**
    * Funzione che realizza la mappatura dei pixel dell'immagine sottocampionata,
    * nell'immagine originale
-   * 
+   *
    * @param x
    *          coordinata x
    * @param y
@@ -339,21 +339,21 @@ public class Harris_ implements PlugInFilter {
 /**
  * Gradient vector classe che effettua il calcolo del gradiente smussato,
  * effetturando le derivate x e y di una gaussiana
- * 
+ *
  * @author Messina Mariagrazia
- * 
+ *
  */
 class GradientVector {
 
-  int        halfwindow = 1;
-  double     sigma2     = 1.2;
+  int halfwindow = 1;
+  double sigma2 = 1.2;
 
-  double[][] kernelGx   = new double[2 * halfwindow + 1][2 * halfwindow + 1];
-  double[][] kernelGy   = new double[2 * halfwindow + 1][2 * halfwindow + 1];
+  double[][] kernelGx = new double[2 * halfwindow + 1][2 * halfwindow + 1];
+  double[][] kernelGy = new double[2 * halfwindow + 1][2 * halfwindow + 1];
 
   /**
    * Metodo costruttore
-   * 
+   *
    */
   public GradientVector() {
     for (int y = -halfwindow; y <= halfwindow; y++)
@@ -366,7 +366,7 @@ class GradientVector {
   /**
    * Funzione che realizza lo smussamento dell'immagine mediante una gaussiana
    * per poi calcolarne la derivata x (operatore Drog)
-   * 
+   *
    * @param x
    *          coordinata x
    * @param y
@@ -383,7 +383,7 @@ class GradientVector {
   /**
    * Funzione che realizza lo smussamento dell'immagine mediante una gaussiana
    * per poi calcolarne la derivata y (operatore Drog)
-   * 
+   *
    * @param x
    *          coordinata x
    * @param y
@@ -401,7 +401,7 @@ class GradientVector {
   /**
    * Funzione che inserisce in un vettore il valore del gradiente dei punti
    * appartenenti ad una finestre
-   * 
+   *
    * @param x
    *          coordinata x
    * @param y

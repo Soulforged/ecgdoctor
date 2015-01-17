@@ -17,7 +17,7 @@ import edu.uk.dromm.img.ImageProcess;
 
 public class ECGImagePreprocessing implements ImageProcess {
 
-  private final ImageParameterProvider ipp;
+  protected final ImageParameterProvider ipp;
   private final EnhancementStrategy es;
 
   public ECGImagePreprocessing() {
@@ -31,7 +31,7 @@ public class ECGImagePreprocessing implements ImageProcess {
     final ImageProcessor ip = new ColorProcessor(bi);
     final BinaryProcessor bp = new BinaryProcessor(
         (ByteProcessor) ip.convertToByte(false));
-    es.workflow(bp.getStatistics()).execute(bp);;
+    es.workflow(bp.getStatistics()).execute(bp);
     return bp.getBufferedImage();
   }
 
@@ -41,11 +41,13 @@ public class ECGImagePreprocessing implements ImageProcess {
     public void run(final ImageProcessor ip) {
       final BinaryProcessor bp = (BinaryProcessor) ip;
       final AutoThresholder thresholder = new AutoThresholder();
-      int threshold = thresholder.getThreshold(ipp.thresholdMethod(bp.getStatistics()), bp.getHistogram());
+      int threshold = thresholder.getThreshold(
+          ipp.thresholdMethod(bp.getStatistics()), bp.getHistogram());
       bp.threshold(threshold);
-      for(int i = 0; i < 5; i++)
+      for (int i = 0; i < 5; i++)
         bp.filter(ImageProcessor.BLUR_MORE);
-      threshold = thresholder.getThreshold(ipp.thresholdMethod(bp.getStatistics()), bp.getHistogram());
+      threshold = thresholder.getThreshold(
+          ipp.thresholdMethod(bp.getStatistics()), bp.getHistogram());
       bp.threshold(threshold);
       bp.skeletonize();
     }
