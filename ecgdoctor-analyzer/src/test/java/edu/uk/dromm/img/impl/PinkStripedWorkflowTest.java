@@ -26,16 +26,16 @@ public class PinkStripedWorkflowTest {
   @Test
   public void variants() {
     final URL[] resources = new URL[] {
-        this.getClass().getResource(
-            "/image/ecg-pink-M234Mo253Std23Sk-2Ku14.jpg"),
-        this.getClass().getResource(
-            "/image/ecg-pink-M227Mo255Std41Sk-3Ku13.gif"),
-        this.getClass()
-            .getResource("/image/ecg-pink-M224Mo249Std39Sk-2Ku7.jpg"),
-        this.getClass().getResource(
-            "/image/ecg-pink-M235Mo255Std31Sk-4Ku22.jpg"),
-        this.getClass()
-            .getResource("/image/ecg-pink-M201Mo234Std41Sk-1Ku0.jpg"), };
+    // this.getClass().getResource(
+    // "/image/ecg-pink-M234Mo253Std23Sk-2Ku14.jpg"),
+    this.getClass().getResource("/image/ecg-pink-M227Mo255Std41Sk-3Ku13.gif"),
+    // this.getClass()
+    // .getResource("/image/ecg-pink-M224Mo249Std39Sk-2Ku7.jpg"),
+    // this.getClass().getResource(
+    // "/image/ecg-pink-M235Mo255Std31Sk-4Ku22.jpg"),
+    // this.getClass()
+    // .getResource("/image/ecg-pink-M201Mo234Std41Sk-1Ku0.jpg")
+    };
     produceVariants(resources);
   }
 
@@ -46,7 +46,7 @@ public class PinkStripedWorkflowTest {
       try {
         bi = ImageIO.read(url);
         final ByteProcessor ip = (ByteProcessor) new ColorProcessor(bi)
-            .convertToByte(false);
+        .convertToByte(false);
         new PinkStripedWorkflow().execute(ip);
         final ImageStatistics is = ip.getStatistics();
         final String[] splitted = url.getPath().split("/");

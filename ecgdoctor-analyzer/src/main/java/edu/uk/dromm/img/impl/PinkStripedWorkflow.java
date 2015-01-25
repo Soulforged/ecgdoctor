@@ -1,5 +1,5 @@
 /**
- * 
+ *
  */
 package edu.uk.dromm.img.impl;
 
@@ -16,13 +16,16 @@ import edu.uk.dromm.img.EnhancementWorkflow;
 public class PinkStripedWorkflow implements EnhancementWorkflow {
 
   /**
-   * 
+   *
    */
   public PinkStripedWorkflow() {
   }
 
-  /* (non-Javadoc)
-   * @see edu.uk.dromm.img.EnhancementWorkflow#execute(ij.process.ImageProcessor)
+  /*
+   * (non-Javadoc)
+   * 
+   * @see
+   * edu.uk.dromm.img.EnhancementWorkflow#execute(ij.process.ImageProcessor)
    */
   @Override
   public void execute(final ByteProcessor ip) {
@@ -38,6 +41,8 @@ public class PinkStripedWorkflow implements EnhancementWorkflow {
     ip.autoThreshold();
 
     ip.skeletonize();
+    for (int i = 0; i < 10; i++)
+      ip.convolve3x3(new int[] { 0, 0, 0, 0, 1, 0, 0, 0, 0 });
   }
 
 }
