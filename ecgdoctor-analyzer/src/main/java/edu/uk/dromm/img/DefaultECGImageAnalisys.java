@@ -46,6 +46,49 @@ public class DefaultECGImageAnalisys implements ImageAnalysis {
     this.blackValue = blackValue;
   }
 
+  public Point detectStart(final List<Point> coalescedPoints) {
+    int zCount = 0;
+    Point sp = null;
+    for (final Point p : coalescedPoints) {
+      if (p.y == 0) {
+        if (zCount == 0)
+          sp = p;
+        zCount++;
+      } else
+        zCount = 0;
+      if (zCount > 5)
+        break;
+    }
+    return sp;
+  }
+
+  public List<Point> coalesce(final List<Point> calibratedPoints) {
+    final List<Point> filteredPoints = new ArrayList<>();
+    int lastHeight = 0;
+    int lastLength = 0;
+    int toAvg = 0;
+    int count = 0;
+    for (final Point p : calibratedPoints) {
+      Point toAdd = p;
+      if (p.x == lastLength) {
+        if (Math.abs(p.y - lastHeight) > 2)
+          continue;
+        toAvg += p.y;
+        count++;
+        continue;
+      }
+      if (toAvg != 0) {
+        toAdd = new ECGPoint(p.x, toAvg / count);
+        toAvg = 0;
+        count = 0;
+      }
+      lastHeight = p.y;
+      lastLength = p.x;
+      filteredPoints.add(toAdd);
+    }
+    return filteredPoints;
+  }
+
   public List<HeightLengths> mapLengths(
       final Map<Integer, List<Point>> allPointsPerHeight) {
     final List<HeightLengths> allLenghtsPerHeight = new ArrayList<>();
