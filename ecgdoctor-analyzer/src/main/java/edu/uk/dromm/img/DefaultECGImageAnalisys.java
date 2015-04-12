@@ -46,6 +46,69 @@ public class DefaultECGImageAnalisys implements ImageAnalysis {
     this.blackValue = blackValue;
   }
 
+  public EcgMetrics detectWaves(final List<Point> points) {
+    final EcgMetrics met = new EcgMetrics();
+    for (final Point p : points) {
+      if (p.y > 0 && met.pStart == -1)
+        met.pStart = p.x;
+      if (met.pStart > -1 && met.pEnd == 0)
+        if (p.y > met.pPeak) {
+          met.pPeak = p.y;
+          met.pPeakT = p.x;
+        }
+      if (met.pStart > -1 && p.y == 0 && met.pEnd == 0)
+        met.pEnd = p.x;
+      if (met.pEnd > 0 && p.y < 0 && met.qStart == 0)
+        met.qStart = p.x;
+      if (met.qStart > 0 && p.y <= 0 && met.rStart == 0)
+        if (met.qPeak > p.y) {
+          met.qPeak = p.y;
+          met.qPeakT = p.x;
+        }
+      if (met.qStart > 0 && p.y >= 0 && met.rStart == 0)
+        met.rStart = p.x;
+      if (met.rStart > 0 && met.sStart == 0)
+        if (p.y > met.rPeak) {
+          met.rPeak = p.y;
+          met.rPeakT = p.x;
+        }
+      if (met.rStart > 0 && met.rPeak > 0 && p.y <= 0 && met.sStart == 0)
+        met.sStart = p.x;
+      if (met.sStart > 0 && met.sEnd == 0)
+        if (met.sPeak > p.y) {
+          met.sPeak = p.y;
+          met.sPeakT = p.x;
+        }
+      if (met.sStart > 0 && met.sPeak < 0 && p.y == 0 && met.sEnd == 0)
+        met.sEnd = p.x;
+      if (met.sEnd > 0 && met.tStart == 0)
+        met.tStart = p.x;
+      if (met.tStart > 0 && met.tEnd == 0)
+        if (p.y > met.tPeak) {
+          met.tPeak = p.y;
+          met.tPeakT = p.x;
+        }
+      if (met.tStart > 0 && met.tPeak > 0 && p.y == 0 && met.tEnd == 0)
+        met.tEnd = p.x;
+      if (met.tEnd > 0 && p.y > met.nextR) {
+        met.nextR = p.y;
+        met.nextRt = p.x;
+      }
+    }
+    return met;
+  }
+
+  public List<Point> chop(final List<Point> coalescedPoints, final Point startAt) {
+    CollectionUtils.filter(coalescedPoints, new Predicate() {
+      @Override
+      public boolean evaluate(final Object p) {
+        final Point point = (Point) p;
+        return point.x >= startAt.x;
+      }
+    });
+    return coalescedPoints;
+  }
+
   public Point detectStart(final List<Point> coalescedPoints) {
     int zCount = 0;
     Point sp = null;
@@ -151,7 +214,7 @@ public class DefaultECGImageAnalisys implements ImageAnalysis {
     HeightLengths maxL = lengths.get(0);
     for (final HeightLengths hl : lengths)
       if (lowerMargin <= hl.getHeight() && hl.getHeight() <= upperMargin
-      && maxL.sum < hl.sum)
+          && maxL.sum < hl.sum)
         maxL = hl;
     return maxL.height;
   }
@@ -217,7 +280,7 @@ public class DefaultECGImageAnalisys implements ImageAnalysis {
 
   /*
    * (non-Javadoc)
-   *
+   * 
    * @see edu.uk.dromm.img.ImageProcess#process(java.awt.image.BufferedImage)
    */
   @Override
@@ -321,7 +384,7 @@ public class DefaultECGImageAnalisys implements ImageAnalysis {
 
   private static void print(final String title, final List<Point> points) {
     System.out
-    .println(String.format(" ============= %s ============= ", title));
+        .println(String.format(" ============= %s ============= ", title));
     for (final Point p : points)
       System.out.println(p);
   }
@@ -605,7 +668,7 @@ public class DefaultECGImageAnalisys implements ImageAnalysis {
 
     /*
      * (non-Javadoc)
-     *
+     * 
      * @see org.apache.commons.collections.Predicate#evaluate(java.lang.Object)
      */
     @Override

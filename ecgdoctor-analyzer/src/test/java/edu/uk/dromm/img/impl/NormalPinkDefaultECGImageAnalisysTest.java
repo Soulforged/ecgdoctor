@@ -26,6 +26,7 @@ import org.junit.Test;
 import edu.uk.dromm.img.DefaultECGImageAnalisys;
 import edu.uk.dromm.img.DefaultECGImageAnalisys.HeightLengths;
 import edu.uk.dromm.img.DefaultECGImageAnalisys.Range;
+import edu.uk.dromm.img.EcgMetrics;
 import edu.uk.dromm.img.ImageProcess;
 
 /**
@@ -35,6 +36,7 @@ import edu.uk.dromm.img.ImageProcess;
 public class NormalPinkDefaultECGImageAnalisysTest {
 
   private static final String IMAGE = "/image/ecg-pink-typical-normal2.jpg";
+
   private static BinaryProcessor bp;
 
   @Test
@@ -67,6 +69,26 @@ public class NormalPinkDefaultECGImageAnalisysTest {
     Assert.assertEquals(sifted.keySet().size(), filteredPoints.size());
     final Point start = ana.detectStart(filteredPoints);
     System.out.println(start);
+    final List<Point> chopped = ana.chop(filteredPoints, start);
+    System.out.println(chopped);
+    final EcgMetrics met = ana.detectWaves(chopped);
+    System.out.println(String.format(
+        "P starts at %s and ends at %s, with a peak of %s at %s", met.pStart,
+        met.pEnd, met.pPeak, met.pPeakT));
+    System.out.println(String.format(
+        "Q starts at %s and reaches its peak %s at %s", met.qStart, met.qPeak,
+        met.qPeakT));
+    System.out.println(String.format(
+        "R starts at %s and reaches its peak %s at %s", met.rStart, met.rPeak,
+        met.rPeakT));
+    System.out.println(String.format(
+        "S starts at %s and ends at %s, with a peak of %s at %s", met.sStart,
+        met.sEnd, met.sPeak, met.sPeakT));
+    System.out.println(String.format(
+        "T starts at %s and ends at %s, with a peak of %s at %s", met.tStart,
+        met.tEnd, met.tPeak, met.tPeakT));
+    System.out.println(String.format("Next R occurs at %s with a peak of %s",
+        met.nextRt, met.nextR));
   }
 
   private static ImageProcessor getImageProcessor(final String imageResourcePath) {
