@@ -40,7 +40,9 @@ public class NormalPinkDefaultECGImageAnalisysTest {
     final DefaultECGImageAnalisys ana = new DefaultECGImageAnalisys(0);
     final ECGParameters ecgParams = ana.process(resultantBi);
 
-    Assert.assertEquals(Math.round(999.0), Math.round(ecgParams.getRrDiff()));
+    Assert.assertEquals(1050, Math.round(ecgParams.getRrDiff()));
+    Assert.assertEquals(1, Math.round(ecgParams.getrPeak()));
+    System.out.println(ecgParams);
   }
 
 }

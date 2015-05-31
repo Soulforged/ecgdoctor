@@ -36,30 +36,13 @@ public class DefaultECGImageAnalisys implements ImageAnalysis {
 
   private int blackValue = 0;
   private final float avgLeadWidth = 0.2400620201f;
+  private final float avgLeadHeight = 0.08f;
 
   @Override
   public ECGParameters process(final BufferedImage bi) {
     final ImageProcessor ip = new BinaryProcessor(new ByteProcessor(bi));
-    // final List<Point> zeroes = zeroes(ip);
-    // final List<Point> firstThreeZeroes = zeroes.subList(0, 3);
-    // final double gridCellProportionY = 0.037593985;
-    // final double gridCellProportionX = 0.0208333333;
-    // final double cellHeightInPx = ip.getHeight() * gridCellProportionY;
-    // final double cellWidthInPx = ip.getWidth() * gridCellProportionX;
-    // final double leadDistance = cellWidthInPx * 12.5;
-    // final int maxY = new Double(cellHeightInPx * 3).intValue();
-    // final int firstLeadMark = new Double(leadDistance).intValue();
-    // final int secondLeadMark = firstLeadMark * 2;
-    // final int thirdLeadMark = firstLeadMark * 3;
-    // final int fourthLeadMark = Math.max(firstLeadMark * 4, ip.getWidth());
-    // final int firstStripeUpper = firstThreeZeroes.get(0).y + maxY;
-    // final int firstStripeLower = firstThreeZeroes.get(0).y - maxY;
-    // final int secondStripeUpper = firstThreeZeroes.get(1).y + maxY;
-    // final int secondStripeLower = firstThreeZeroes.get(1).y - maxY;
-    // final int thirdStripeUpper = firstThreeZeroes.get(2).y + maxY;
-    // final int thirdStripeLower = firstThreeZeroes.get(2).y - maxY;
-    final double gridCellMs = 7.4;
-    final double gridCellV = 1;
+    final double gridCellMs = 2600 / (ip.getWidth() * avgLeadWidth);
+    final double gridCellMV = 1 / (ip.getHeight() * avgLeadHeight);
 
     final List<Point> allPoints = allPoints(ip);
     final List<Point> allPointsI = allPoints(allPoints, 1, ip.getWidth());
@@ -77,15 +60,15 @@ public class DefaultECGImageAnalisys implements ImageAnalysis {
     final Point start = detectStart(filteredPoints);
     final List<Point> chopped = chop(filteredPoints, start);
     final EcgMetrics met = detectWaves(chopped);
-    return new ECGParameters(met.pStart * gridCellMs, met.pPeak * gridCellV,
+    return new ECGParameters(met.pStart * gridCellMs, met.pPeak * gridCellMV,
         met.pEnd * gridCellMs, met.pPeakT * gridCellMs,
-        met.qStart * gridCellMs, met.qPeak * gridCellV,
-        met.qPeakT * gridCellMs, met.rStart * gridCellMs,
-        met.rPeak * gridCellV, met.rPeakT * gridCellMs,
-        met.sStart * gridCellMs, met.sPeak * gridCellV, met.sEnd * gridCellV,
-        met.sPeakT * gridCellMs, met.tStart * gridCellMs,
-        met.tPeak * gridCellV, met.tEnd * gridCellMs, met.tPeakT * gridCellMs,
-        met.nextR * gridCellV, met.nextRt * gridCellMs);
+        met.qStart * gridCellMs, met.qPeak * gridCellMV, met.qPeakT
+        * gridCellMs, met.rStart * gridCellMs, met.rPeak * gridCellMV,
+        met.rPeakT * gridCellMs, met.sStart * gridCellMs, met.sPeak
+        * gridCellMV, met.sEnd * gridCellMV, met.sPeakT * gridCellMs,
+        met.tStart * gridCellMs, met.tPeak * gridCellMV, met.tEnd * gridCellMs,
+        met.tPeakT * gridCellMs, met.nextR * gridCellMV, met.nextRt
+        * gridCellMs);
   }
 
   /**
@@ -338,7 +321,7 @@ public class DefaultECGImageAnalisys implements ImageAnalysis {
     HeightLengths maxL = lengths.get(0);
     for (final HeightLengths hl : lengths)
       if (lowerMargin <= hl.getHeight() && hl.getHeight() <= upperMargin
-          && maxL.sum < hl.sum)
+      && maxL.sum < hl.sum)
         maxL = hl;
     return maxL.height;
   }

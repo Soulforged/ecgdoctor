@@ -166,4 +166,18 @@ public class ECGParameters {
     return rrDiff;
   }
 
+  @Override
+  public String toString() {
+    return "ECGParameters [pStart=" + pStart + ", pPeak=" + pPeak + ", pEnd="
+        + pEnd + ", pPeakT=" + pPeakT + ", pDur=" + pDur + ", qStart=" + qStart
+        + ", qPeak=" + qPeak + ", qPeakT=" + qPeakT + ", qDur=" + qDur
+        + ", rStart=" + rStart + ", rPeak=" + rPeak + ", rPeakT=" + rPeakT
+        + ", rDur=" + rDur + ", sStart=" + sStart + ", sPeak=" + sPeak
+        + ", sEnd=" + sEnd + ", sPeakT=" + sPeakT + ", sDur=" + sDur
+        + ", tStart=" + tStart + ", tPeak=" + tPeak + ", tEnd=" + tEnd
+        + ", tPeakT=" + tPeakT + ", tDur=" + tDur + ", qrsDur=" + qrsDur
+        + ", nextR=" + nextR + ", nextRt=" + nextRt + ", rrDiff=" + rrDiff
+        + "]";
+  }
+
 }
