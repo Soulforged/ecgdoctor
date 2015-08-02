@@ -177,7 +177,7 @@ public class DefaultECGImageAnalisys implements ImageAnalysis {
         zCount++;
       } else
         zCount = 0;
-      if (zCount > 5)
+      if (zCount >= 2)
         break;
     }
     return sp;

@@ -18,15 +18,15 @@ import edu.uk.dromm.img.ImageProcess;
 public class ECGController {
 
   public Diagnosis start(final String url) {
-    final Factory f = new Factory();
-    final ImageProcess ip = f.getImagePreProcessing();
+    final Factory factory = new Factory();
+    final ImageProcess ip = factory.getImagePreProcessing();
     BufferedImage bi = null;
     try (FileInputStream stream = new FileInputStream(url)) {
       bi = ImageIO.read(stream);
       final BufferedImage preProcessed = ip.process(bi);
-      final ImageAnalysis ia = f.getImageAnalysis();
+      final ImageAnalysis ia = factory.getImageAnalysis();
       final ECGParameters ecgPrms = ia.process(preProcessed);
-      return f.getInferenceSystem().infer(ecgPrms);
+      return factory.getInferenceSystem().infer(ecgPrms);
     } catch (final Exception e) {
       throw new RuntimeException(e);
     }

@@ -21,12 +21,14 @@ public class PinkStripedWorkflow implements EnhancementWorkflow {
   public PinkStripedWorkflow() {
   }
 
-  /*
-   * (non-Javadoc)
+  /**
+   * Elimina la parte rosa de los de ECG 
+   * Luego con el autothreshold elimina los colores, dejandolo en negro y blanco
+   * Luego el skeletonize afina las lineas 
    * 
    * @see
    * edu.uk.dromm.img.EnhancementWorkflow#execute(ij.process.ImageProcessor)
-   */
+   **/
   @Override
   public void execute(final ByteProcessor ip) {
     final OwnFFTFilter fft = new OwnFFTFilter();

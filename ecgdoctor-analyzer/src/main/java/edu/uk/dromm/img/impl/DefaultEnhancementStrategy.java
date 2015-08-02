@@ -20,7 +20,7 @@ public class DefaultEnhancementStrategy implements EnhancementStrategy {
   public EnhancementWorkflow workflow(final ImageStatistics is) {
     if(is.mode == 255 && is.mean > 240)
       return new ClearWorkflow();
-    if(is.mean >220)
+    if(is.mean > 220)
       return new PinkStripedWorkflow();
     return new GrayscaleWorkflow();
   }

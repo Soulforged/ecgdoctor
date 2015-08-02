@@ -35,8 +35,8 @@ FUZZIFY qrs
 END_FUZZIFY
 
 FUZZIFY pr
-  TERM normal := gauss 160 40; 
   TERM short := sigm -0.045 10;
+  TERM normal := gauss 160 40; 
   TERM long := sigm 0.045 310;
 END_FUZZIFY
 
