@@ -3,10 +3,6 @@
  */
 package edu.uk.dromm.img;
 
-import ij.process.BinaryProcessor;
-import ij.process.ByteProcessor;
-import ij.process.ImageProcessor;
-
 import java.awt.Point;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
@@ -27,6 +23,9 @@ import org.apache.commons.collections.Transformer;
 import org.apache.commons.collections.list.TreeList;
 
 import edu.uk.dromm.img.ecg.exception.InvalidECGSectionException;
+import ij.process.BinaryProcessor;
+import ij.process.ByteProcessor;
+import ij.process.ImageProcessor;
 
 /**
  * @author magian
@@ -50,7 +49,8 @@ public class DefaultECGImageAnalisys implements ImageAnalysis {
     final List<Range> relevantRanges = heightRanges(heightsOrdered, 25);
     final Map<Integer, List<Point>> allPointsPerHeight = allPointsPerHeight(
         allPointsI, heightsOrdered);
-    final List<HeightLengths> allLenghtsPerHeight = mapLengths(allPointsPerHeight);
+    final List<HeightLengths> allLenghtsPerHeight = mapLengths(
+        allPointsPerHeight);
     final int height = zeroByHeightMargins(relevantRanges.get(1).begin,
         relevantRanges.get(1).end, allLenghtsPerHeight);
     final List<Point> pointsInLeadII = pointsInLead(relevantRanges, 1,
@@ -61,14 +61,14 @@ public class DefaultECGImageAnalisys implements ImageAnalysis {
     final List<Point> chopped = chop(filteredPoints, start);
     final EcgMetrics met = detectWaves(chopped);
     return new ECGParameters(met.pStart * gridCellMs, met.pPeak * gridCellMV,
-        met.pEnd * gridCellMs, met.pPeakT * gridCellMs,
-        met.qStart * gridCellMs, met.qPeak * gridCellMV, met.qPeakT
-        * gridCellMs, met.rStart * gridCellMs, met.rPeak * gridCellMV,
-        met.rPeakT * gridCellMs, met.sStart * gridCellMs, met.sPeak
-        * gridCellMV, met.sEnd * gridCellMV, met.sPeakT * gridCellMs,
+        met.pEnd * gridCellMs, met.pPeakT * gridCellMs, met.qStart * gridCellMs,
+        met.qPeak * gridCellMV, met.qPeakT * gridCellMs,
+        met.rStart * gridCellMs, met.rPeak * gridCellMV,
+        met.rPeakT * gridCellMs, met.sStart * gridCellMs,
+        met.sPeak * gridCellMV, met.sEnd * gridCellMs, met.sPeakT * gridCellMs,
         met.tStart * gridCellMs, met.tPeak * gridCellMV, met.tEnd * gridCellMs,
-        met.tPeakT * gridCellMs, met.nextR * gridCellMV, met.nextRt
-        * gridCellMs);
+        met.tPeakT * gridCellMs, met.nextR * gridCellMV,
+        met.nextRt * gridCellMs);
   }
 
   /**
@@ -321,7 +321,7 @@ public class DefaultECGImageAnalisys implements ImageAnalysis {
     HeightLengths maxL = lengths.get(0);
     for (final HeightLengths hl : lengths)
       if (lowerMargin <= hl.getHeight() && hl.getHeight() <= upperMargin
-      && maxL.sum < hl.sum)
+          && maxL.sum < hl.sum)
         maxL = hl;
     return maxL.height;
   }
@@ -452,8 +452,8 @@ public class DefaultECGImageAnalisys implements ImageAnalysis {
     @SuppressWarnings("unchecked")
     final List<Point> copy = new TreeList(allPoints);
     final int prevI = section - 1;
-    CollectionUtils.filter(copy, new PointsBeetweenX(prevI * avgLeadWidth
-        * width, avgLeadWidth * section * width));
+    CollectionUtils.filter(copy, new PointsBeetweenX(
+        prevI * avgLeadWidth * width, avgLeadWidth * section * width));
     return copy;
   }
 

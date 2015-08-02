@@ -42,7 +42,6 @@ public class NormalPinkDefaultECGImageAnalisysTest {
 
     Assert.assertEquals(1050, Math.round(ecgParams.getRrDiff()));
     Assert.assertEquals(1, Math.round(ecgParams.getrPeak()));
-    System.out.println(ecgParams);
   }
 
 }

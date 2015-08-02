@@ -2,13 +2,13 @@ FUNCTION_BLOCK diagnosis
 
 //All time measures are done in milliseconds, all electrical measures are done in millivolts
 VAR_INPUT
-  qrs   : REAL;     //QRS interval time, ventricular depolarization
+  //qrs   : REAL;     //QRS interval time, ventricular depolarization
   //p     : REAL;     //P wave time, atrial activation, depolarization, contraction
-  pv    : REAL;     //P potential
+  //pv    : REAL;     //P potential
   //stt   : REAL;     //ST-T time, ventricular repolarization
   //u     : REAL;     //U wave time, after ventricular depolarizations
   rr    : REAL;     //RR interval, indicator of cardiac cycle time
-  pr    : REAL;     //Interval between the beggining of P and R
+  //pr    : REAL;     //Interval between the beggining of P and R
   //qt    : REAL;     //QT interval, duration of ventricular depolarization and repolarization
   //pp    : REAL;     //PP interval, duration of atrial full cycle
 END_VAR
@@ -23,7 +23,7 @@ FUZZIFY rr
   TERM long := sigm 0.02 1675;
 END_FUZZIFY
 
-FUZZIFY pv
+/*FUZZIFY pv
   TERM absent := (0.0, 1.0) (6.0, 0.0);
   TERM present := (6.0, 0.0) (10.0, 1.0);
 END_FUZZIFY
@@ -35,13 +35,13 @@ FUZZIFY qrs
 END_FUZZIFY
 
 FUZZIFY pr
-  TERM short := sigm -0.045 10;
   TERM normal := gauss 160 40; 
+  TERM short := sigm -0.045 10;
   TERM long := sigm 0.045 310;
-END_FUZZIFY
+END_FUZZIFY*/
 
 DEFUZZIFY result
-  TERM nsr := 1;
+  TERM normalsr := 1;
   TERM cardiopathy := 0; 
   METHOD : COGS;
   DEFAULT := 0;
@@ -51,9 +51,9 @@ RULEBLOCK No1
   AND : MIN;
   ACT : MIN;
   ACCU : MAX;
-  RULE 1 : IF qrs IS normal AND rr IS normal AND pr IS normal AND pv IS present 
-              THEN result IS nsr;
-  RULE 2 : IF qrs IS short OR qrs IS long OR rr IS long OR rr IS short OR pr IS short OR pr IS long OR pv IS absent 
+  RULE 1 : IF rr IS normal 
+              THEN result IS normalsr;
+  RULE 2 : IF rr IS long OR rr IS short 
               THEN result IS cardiopathy;
 END_RULEBLOCK
 

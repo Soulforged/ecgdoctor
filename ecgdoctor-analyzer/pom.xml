@@ -26,8 +26,6 @@
 			<groupId>jFuzzyLogic</groupId>
 			<artifactId>jFuzzyLogic</artifactId>
 			<version>3.0</version>
-			<scope>system</scope>
-			<systemPath>${basedir}/src/main/resources/lib/jFuzzyLogic.jar</systemPath>
 		</dependency>
 		<dependency>
 			<groupId>commons-collections</groupId>
