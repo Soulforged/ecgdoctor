@@ -7,3 +7,5 @@ work/
 .tomcatplugin
 .#webclasspath
 .~*
+ecgdoctor-web/src/main/webapp/WEB-INF/classes/*
+ecgdoctor-web/src/main/webapp/WEB-INF/lib/*

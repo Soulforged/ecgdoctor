@@ -1,0 +1,6 @@
+<Context 
+    docBase="${depasse.home}/depasse/depasse-admin-parent/depasse-admin-web/src/main/webapp/." 
+    path="/admin" 
+    reloadable="true"
+    clearReferencesStopThreads="true"
+/>
