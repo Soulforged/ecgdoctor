@@ -1,6 +1,6 @@
 <Context 
-    docBase="${depasse.home}/depasse/depasse-admin-parent/depasse-admin-web/src/main/webapp/." 
-    path="/admin" 
+    docBase="${ecgdoctor.home}/ecgdoctor-web/src/main/webapp/." 
+    path="/ecgdoctor" 
     reloadable="true"
     clearReferencesStopThreads="true"
 />
