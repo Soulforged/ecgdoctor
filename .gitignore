@@ -9,3 +9,5 @@ work/
 .~*
 ecgdoctor-web/src/main/webapp/WEB-INF/classes/*
 ecgdoctor-web/src/main/webapp/WEB-INF/lib/*
+.idea/
+*.iml
