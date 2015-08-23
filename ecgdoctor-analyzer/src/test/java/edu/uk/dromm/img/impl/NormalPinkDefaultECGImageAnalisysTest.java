@@ -3,18 +3,17 @@
  */
 package edu.uk.dromm.img.impl;
 
-import java.awt.image.BufferedImage;
-import java.io.IOException;
-import java.net.URL;
-
-import javax.imageio.ImageIO;
-
-import org.junit.Assert;
-import org.junit.Test;
-
 import edu.uk.dromm.img.DefaultECGImageAnalisys;
 import edu.uk.dromm.img.ECGParameters;
 import edu.uk.dromm.img.ImageProcess;
+import org.junit.Assert;
+import org.junit.Test;
+
+import javax.imageio.ImageIO;
+import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.IOException;
+import java.net.URL;
 
 /**
  * @author magian
@@ -22,10 +21,10 @@ import edu.uk.dromm.img.ImageProcess;
  */
 public class NormalPinkDefaultECGImageAnalisysTest {
 
-  private static final String IMAGE = "/image/ecg-pink-typical-normal2.jpg";
+  private static final String IMAGE = "/image/ecg-pink-typical-normal.gif";
 
   @Test
-  public void canFillSpacesBetweenPoints() {
+  public void canFillSpacesBetweenPoints() throws IOException {
     final URL ecgImage = NormalPinkDefaultECGImageAnalisysTest.class
         .getResource(IMAGE);
     Assert.assertNotNull(ecgImage);
